@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from containers import container
 from endpoints import router
+from llm import VLLMUnavailableError
 
 
 @asynccontextmanager
@@ -15,6 +17,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router)
+
+
+@app.exception_handler(VLLMUnavailableError)
+async def vllm_unavailable_handler(request: Request, exc: VLLMUnavailableError):
+    return JSONResponse(status_code=503, content={"detail": str(exc)})
 
 
 # Wiring must happen after all @inject-decorated routes above are defined,
