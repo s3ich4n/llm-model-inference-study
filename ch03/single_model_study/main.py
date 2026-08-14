@@ -19,5 +19,6 @@ app.include_router(router)
 
 # Wiring must happen after all @inject-decorated routes above are defined,
 # since container.wire() only binds providers to functions it can already
-# see in the module namespace at call time.
-container.wire(modules=["endpoints"])
+# see in the module namespace at call time. Which modules to wire is
+# declared on the Container itself (wiring_config); this just triggers it.
+container.wire()
