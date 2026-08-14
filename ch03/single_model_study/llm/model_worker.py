@@ -9,10 +9,10 @@ from logs import logger
 
 class ModelWorker:
     def __init__(self, model_name: str):
-        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = "cpu"
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         logger.debug(f"Loading model {model_name} on device {self.device}")
         self.model, self.tokenizer = ModelManager().load_model(model_name)
+        self.model = self.model.to(self.device)
         # Initialize state for streaming
         self.stream_states = {}  # request_id -> (input_ids, attention_mask, past_key_values)
 
