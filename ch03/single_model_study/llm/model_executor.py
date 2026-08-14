@@ -1,6 +1,7 @@
 import multiprocessing
 from typing import Any
 
+from llm.exceptions import UnexpectedResultTypeError
 from llm.model_worker import ModelWorker
 from logs import logger
 
@@ -13,10 +14,6 @@ from logs import logger
 # when the parent is multi-threaded (e.g. under pytest) - that's a known,
 # separate, currently-accepted tradeoff, not a bug.
 _mp_context = multiprocessing.get_context("fork")
-
-
-class UnexpectedResultTypeError(Exception):
-    pass
 
 
 class ModelExecutor:
