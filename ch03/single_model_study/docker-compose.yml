@@ -1,0 +1,23 @@
+services:
+  single-model-study:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist the downloaded HF model across container restarts instead of
+      # re-downloading facebook/opt-125m every time.
+      - hf-cache:/root/.cache/huggingface
+    # CPU-only by default. To use a GPU instead (needs the NVIDIA Container
+    # Toolkit on the host), uncomment the block below - no image rebuild or
+    # code change needed, llm/model_worker.py and llm/llm.py both detect it
+    # via torch.cuda.is_available() at container startup.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  hf-cache:
