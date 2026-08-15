@@ -5,9 +5,11 @@ import threading
 import time
 import uuid
 
+import torch
 from vllm import LLM as VLLM
 from vllm import SamplingParams
 
+from llm.exceptions import VLLMUnavailableError
 from llm.model_executor import ModelExecutor
 from llm.workload_manager import Sequence, WorkloadManager
 from logs import logger
@@ -22,8 +24,14 @@ class LLMEngine:
         # Initialize the model
         self.model_executor.setup_worker("facebook/opt-125m")
 
-        # Initialize vLLM model
-        self.vllm_model = VLLM(model="facebook/opt-125m")
+        # vLLM requires a visible GPU; its platform detection raises if none
+        # is found, which would otherwise take the whole app down at
+        # startup. Skip it on CPU-only deployments instead.
+        if torch.cuda.is_available():
+            self.vllm_model = VLLM(model="facebook/opt-125m")
+        else:
+            self.vllm_model = None
+            logger.warning("No GPU detected; vLLM-backed generation is disabled")
 
         # Start processing loop in a separate thread
         self.thread = threading.Thread(
@@ -201,6 +209,9 @@ class LLMEngine:
             top_p=0.95,
             max_tokens=self.max_tokens,
         )
+
+        if self.vllm_model is None:
+            raise VLLMUnavailableError("vLLM is not available: no GPU detected")
 
         # Generate text for all prompts
         outputs = self.vllm_model.generate(prompts, sampling_params)

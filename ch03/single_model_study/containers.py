@@ -18,6 +18,8 @@ def _llm_engine() -> Iterator[LLMEngine]:
 
 
 class Container(containers.DeclarativeContainer):
+    wiring_config = containers.WiringConfiguration(modules=["endpoints"])
+
     llm_engine = providers.Resource(_llm_engine)
 
 
