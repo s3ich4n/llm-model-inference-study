@@ -58,15 +58,19 @@ class WorkloadManager:
         is_streaming: bool = False
     ) -> list[Sequence]:
         if is_streaming:
-            while len(
-                self.active_streaming_sequences
-                ) < self.batch_size and not self.incoming_streaming_queue.empty():
+            while (
+                len(self.active_streaming_sequences) < self.batch_size
+                and not self.incoming_streaming_queue.empty()
+            ):
                 sequence = self.incoming_streaming_queue.get()
                 self.active_streaming_sequences.append(sequence)
 
             return self.active_streaming_sequences
         else:
-            while len(self.active_sequences) < self.batch_size and not self.incoming_queue.empty():
+            while (
+                len(self.active_sequences) < self.batch_size
+                and not self.incoming_queue.empty()
+            ):
                 sequence = self.incoming_queue.get()
                 self.active_sequences.append(sequence)
 

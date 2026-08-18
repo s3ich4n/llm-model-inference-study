@@ -96,7 +96,7 @@ def test_generate_batch(
 @pytest.mark.asyncio
 async def test_generate_stream(
     async_client
-    ):
+):
     print("Starting test_generate_stream...")
 
     prompt = "Hello, I am"
@@ -134,7 +134,7 @@ async def test_generate_stream(
 @pytest.mark.asyncio
 async def test_generate_stream_concurrent(
     async_client
-    ):
+):
     print("Starting test_generate_stream_concurrent...")
 
     async def make_stream_request(

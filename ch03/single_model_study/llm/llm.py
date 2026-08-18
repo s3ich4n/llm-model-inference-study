@@ -45,7 +45,7 @@ class LLMEngine:
 
     def requests_processing_loop(
         self
-        ):
+    ):
         """Process requests in a loop."""
         while True:
             try:
@@ -55,7 +55,10 @@ class LLMEngine:
                     continue
 
                 # Process batch through model, forward pass.
-                prompts = [{'prompt': seq.prompt, 'request_id': seq.id} for seq in active_sequences]
+                prompts = [
+                    {'prompt': seq.prompt, 'request_id': seq.id}
+                    for seq in active_sequences
+                ]
                 prompts_results = self.model_executor.execute_forward_batch(prompts)
 
                 # Stream tokens back to respective clients
@@ -89,7 +92,7 @@ class LLMEngine:
 
     def _cleanup(
         self
-        ):
+    ):
         """Cleanup function to be called when the program exits."""
         # The processing loop thread is a daemon thread, so it's terminated
         # automatically; the worker process needs to be shut down explicitly.
@@ -99,7 +102,7 @@ class LLMEngine:
     def basic_generate(
         self,
         prompt: str
-        ) -> str:
+    ) -> str:
 
         sequence = Sequence(str(uuid.uuid4()), prompt, None, None)
 
@@ -111,7 +114,7 @@ class LLMEngine:
     def _is_batch_finished(
         self,
         request_ids: list[str]
-        ) -> bool:
+    ) -> bool:
         for id in request_ids:
             if not self.workload_manager.is_sequence_finished(id):
                 return False
@@ -121,7 +124,7 @@ class LLMEngine:
     def generate(
         self,
         prompts: list[str]
-        ) -> list[str]:
+    ) -> list[str]:
         # Add all requests to workload manager
         request_ids = []
         for prompt in prompts:
@@ -160,7 +163,7 @@ class LLMEngine:
         self,
         loop,
         prompt: str
-        ):
+    ):
 
         asyncio.set_event_loop(loop)
         # Create a queue for this client's stream
