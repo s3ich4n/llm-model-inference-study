@@ -16,24 +16,6 @@ from llm import LLMEngine
 router = APIRouter()
 
 
-@router.post("/generate_stream")
-@inject
-async def generate_stream(
-    request: GenerateRequest,
-    llm: LLMEngine = Depends(Provide[Container.llm_engine]),
-):
-    async def event_generator():
-        loop = asyncio.get_event_loop()
-        async for token in llm.event_generator(loop, request.prompt):
-            # token = 'data: {"token": " a", "sequence_id": "8310f5e1-6f6f-480e-b2f9-c8144a12cc17"}\n\n'
-            yield token
-
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream"
-    )
-
-
 # process 1 request with only one prompt at a time.
 @router.post("/basic_generate", response_model=GenerateResponse)
 @inject
@@ -54,6 +36,24 @@ async def generate(
 ):
     generated_texts = llm.generate(request.prompts)
     return BatchGenerateResponse(generated_texts=generated_texts)
+
+
+@router.post("/generate_stream")
+@inject
+async def generate_stream(
+    request: GenerateRequest,
+    llm: LLMEngine = Depends(Provide[Container.llm_engine]),
+):
+    async def event_generator():
+        loop = asyncio.get_event_loop()
+        async for token in llm.event_generator(loop, request.prompt):
+            # token = 'data: {"token": " a", "sequence_id": "8310f5e1-6f6f-480e-b2f9-c8144a12cc17"}\n\n'
+            yield token
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
 
 
 @router.post("/generate_vllm", response_model=BatchGenerateResponse)

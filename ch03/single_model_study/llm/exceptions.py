@@ -4,3 +4,7 @@ class UnexpectedResultTypeError(Exception):
 
 class VLLMUnavailableError(Exception):
     pass
+
+
+class WorkerDiedError(Exception):
+    pass
