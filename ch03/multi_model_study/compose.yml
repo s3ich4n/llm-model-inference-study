@@ -1,0 +1,32 @@
+services:
+  # Only the 4th model (densenet_onnx) runs on Triton. The other three are
+  # loaded in-process by transformers / torchvision, so this container is not
+  # needed for them.
+  #
+  # Port 8009 is not arbitrary: app/worker.py's TritonWorker hardcodes
+  # 0.0.0.0:8009 as the HTTP endpoint. 8010 is gRPC, 8011 is metrics.
+  triton:
+    image: nvcr.io/nvidia/tritonserver:24.12-py3
+    ports:
+      - "8009:8000"
+      - "8010:8001"
+      - "8011:8002"
+    volumes:
+      - ./model_dir:/models:ro
+    # Explicit control mode is the point of this example: the app loads and
+    # unloads models on demand through /v2/repository/models/.../load. The
+    # default (poll) mode would keep everything resident and defeat that.
+    command: >
+      tritonserver
+      --model-repository=/models
+      --model-control-mode=explicit
+    # CPU-only by default; densenet_onnx is small enough for that. To use a
+    # GPU instead, uncomment the block below (needs the NVIDIA Container
+    # Toolkit on the host).
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
