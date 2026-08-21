@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Dict, Optional
 from .store import ModelStore
-from .worker import ModelWorker
+from .workers.base import ModelWorker
 from .engine import ModelEngine
 
 class ModelManager:

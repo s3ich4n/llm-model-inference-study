@@ -1,10 +1,9 @@
+from typing import Any
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict
-from typing import Any, Dict, Optional
-import uvicorn
-import os
-from .store import ModelStore
 from .manager import ModelManager
+from .store import ModelStore
 
 app = FastAPI(title="Multi-Model Serving Demo")
 
@@ -37,8 +36,3 @@ async def list_models():
         "available_models": model_store.list_models(),
         "loaded_models": model_manager.list_loaded_models()
     }
-
-if __name__ == "__main__":
-    # Get port from environment variable or use default 8001
-    port = int(os.getenv("PORT", "8001"))
-    uvicorn.run(app, host="0.0.0.0", port=port) 

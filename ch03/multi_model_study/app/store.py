@@ -10,6 +10,7 @@ class ModelMetadata(BaseModel):
     version: str
     description: str
 
+
 class ModelStore:
     def __init__(self, config_path: str):
         self.models: Dict[str, ModelMetadata] = {}
