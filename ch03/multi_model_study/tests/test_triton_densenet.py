@@ -1,95 +1,70 @@
-import os
-import unittest
+"""Triton 서버를 앱을 거치지 않고 직접 두드린다.
+
+`TritonWorker` 가 하는 일(관리 API로 load/unload, tritonclient로 infer)을
+그대로 손으로 해 보는 대조군이다. 전부 `@pytest.mark.triton` 이라
+서버가 안 떠 있으면 통째로 건너뛴다.
+"""
 
 import numpy as np
-import requests
+import pytest
 import tritonclient.http as httpclient
 from PIL import Image
 
+from tests.model_ids import DENSENET_INPUT, DENSENET_OUTPUT
 
-class TestTritonDenseNet(unittest.TestCase):
-    def setUp(self):
-        self.triton_url = "0.0.0.0:8009"
-        self.model_name = "densenet_onnx"
-        self.client = httpclient.InferenceServerClient(url=self.triton_url)
+pytestmark = pytest.mark.triton
 
-        # Test image path - you'll need to provide a test image
-        self.test_image_path = os.path.join(
-            os.path.dirname(__file__),
-            "images",
-            "cat1.jpg",
-        )
 
-    def test_model_loading(self):
-        """Test loading the model through Triton management API"""
-        # Load model
-        load_url = (
-            f"http://{self.triton_url}/v2/repository/models/{self.model_name}/load"
-        )
-        response = requests.post(load_url)
-        self.assertEqual(response.status_code, 200, "Failed to load model")
+def test_model_loading(triton):
+    """explicit 모드라 관리 API로 밀어 올려야 올라온다."""
+    assert triton.load().status_code == 200
+    assert triton.wait_for_state("READY") == "READY"
 
-    def test_model_unloading(self):
-        """Test unloading the model through Triton management API"""
-        # Unload model
-        unload_url = (
-            f"http://{self.triton_url}/v2/repository/models/{self.model_name}/unload"
-        )
-        response = requests.post(unload_url)
-        self.assertEqual(response.status_code, 200, "Failed to unload model")
 
-    def test_model_inference(self):
-        """Test making predictions with the loaded model"""
-        # First load the model
-        load_url = (
-            f"http://{self.triton_url}/v2/repository/models/{self.model_name}/load"
-        )
-        requests.post(load_url)
+def test_model_unloading(triton):
+    triton.load()
+    assert triton.unload().status_code == 200
+    # unload 는 비동기라 UNLOADING 을 한 번 거쳐 간다
+    assert triton.wait_for_state("UNAVAILABLE") == "UNAVAILABLE"
 
-        # Load and preprocess image
-        img = Image.open(self.test_image_path)
-        img = img.resize((224, 224))  # DenseNet expects 224x224 images
-        img_array = np.array(img).astype(np.float32)
 
-        # Normalize image
-        img_array = img_array / 255.0
-        img_array = np.transpose(img_array, (2, 0, 1))  # Change to CHW format
-        # Remove batch dimension expansion since model expects [3,224,224]
+def test_model_inference(triton, cat_image_path):
+    triton.load()
 
-        # Prepare input
-        input_tensor = httpclient.InferInput("data_0", img_array.shape, "FP32")
-        input_tensor.set_data_from_numpy(img_array)
+    image = Image.open(cat_image_path).resize((224, 224))
+    array = np.array(image).astype(np.float32) / 255.0
+    array = np.transpose(array, (2, 0, 1)).astype(np.float32)  # HWC -> CHW
+    # config.pbtxt 가 max_batch_size: 0 이라 배치 축은 붙이지 않는다
 
-        # Make inference request
-        response = self.client.infer(
-            model_name=self.model_name,
+    input_tensor = httpclient.InferInput(DENSENET_INPUT, array.shape, "FP32")
+    input_tensor.set_data_from_numpy(array)
+
+    response = triton.client.infer(
+        model_name=triton.model,
+        inputs=[input_tensor],
+        outputs=[httpclient.InferRequestedOutput(DENSENET_OUTPUT)],
+    )
+
+    logits = response.as_numpy(DENSENET_OUTPUT)
+    assert logits is not None
+    assert logits.shape == (1000,)
+    assert isinstance(np.argmax(logits), np.integer)
+
+
+def test_inference_rejects_a_batch_dimension(triton, cat_image_path):
+    """`max_batch_size: 0` 이라 (1, 3, 224, 224) 를 보내면 서버가 거절한다."""
+    triton.load()
+
+    image = Image.open(cat_image_path).resize((224, 224))
+    array = np.array(image).astype(np.float32) / 255.0
+    array = np.transpose(array, (2, 0, 1))[np.newaxis, ...].astype(np.float32)
+
+    input_tensor = httpclient.InferInput(DENSENET_INPUT, array.shape, "FP32")
+    input_tensor.set_data_from_numpy(array)
+
+    with pytest.raises(Exception, match="(?i)shape|dimension|unexpected"):
+        triton.client.infer(
+            model_name=triton.model,
             inputs=[input_tensor],
-            outputs=[httpclient.InferRequestedOutput("fc6_1")],
+            outputs=[httpclient.InferRequestedOutput(DENSENET_OUTPUT)],
         )
-
-        # Get predictions
-        predictions = response.as_numpy("fc6_1")
-
-        # Basic assertions
-        self.assertIsNotNone(predictions, "No predictions received")
-        self.assertEqual(
-            predictions.shape,
-            (1000,),
-            "Expected shape (1000,) for ImageNet predictions",
-        )
-
-        # Get top prediction
-        top_prediction = np.argmax(predictions)
-        self.assertIsInstance(
-            top_prediction, np.integer, "Top prediction should be an integer"
-        )
-
-        # Clean up - unload model
-        unload_url = (
-            f"http://{self.triton_url}/v2/repository/models/{self.model_name}/unload"
-        )
-        requests.post(unload_url)
-
-
-if __name__ == "__main__":
-    unittest.main()
