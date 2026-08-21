@@ -6,3 +6,10 @@ repos:
         name: ruff (ch03/single_model_study)
         files: ^ch03/single_model_study/
         args: [--fix]
+      - id: ruff-check
+        name: ruff (ch03/multi_model_study)
+        files: ^ch03/multi_model_study/
+        args: [--fix]
+      - id: ruff-format
+        name: ruff-format (ch03/multi_model_study)
+        files: ^ch03/multi_model_study/
