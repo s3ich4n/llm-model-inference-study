@@ -11,12 +11,14 @@ from app.workers.base import ModelWorker
 class TorchVisionWorker(ModelWorker):
     def __init__(self, model_metadata):
         self.transform: transforms.Compose | None = None
+        # super().__init__() 안에서 _load_model()이 도니 그 전에 준비해 둔다
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         super().__init__(model_metadata)
 
     def _load_model(self):
         if self.model is None:  # Only load if not already loaded
             self.model = mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
-            self.model.eval()
+            self.model.to(self.device).eval()
             self.transform = transforms.Compose(
                 [
                     transforms.Resize(256),
@@ -35,8 +37,9 @@ class TorchVisionWorker(ModelWorker):
             image = Image.open(input_data).convert("RGB")
         else:
             image = input_data
-        image_tensor = self.transform(image).unsqueeze(0)
+        # 모델과 같은 장치로 결과를 전송한다
+        image_tensor = self.transform(image).unsqueeze(0).to(self.device)
         with torch.no_grad():
             outputs = self.model(image_tensor)
         predictions = torch.softmax(outputs, dim=1)
-        return {"predictions": predictions.tolist()}
+        return {"predictions": predictions.cpu().tolist()}

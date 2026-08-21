@@ -3,7 +3,7 @@ services:
   # loaded in-process by transformers / torchvision, so this container is not
   # needed for them.
   #
-  # Port 8009 is not arbitrary: app/worker.py's TritonWorker hardcodes
+  # Port 8009 is not arbitrary: app/workers/triton.py's TritonWorker hardcodes
   # 0.0.0.0:8009 as the HTTP endpoint. 8010 is gRPC, 8011 is metrics.
   triton:
     image: nvcr.io/nvidia/tritonserver:24.12-py3
