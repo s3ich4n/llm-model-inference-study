@@ -1,20 +1,17 @@
-from typing import Optional
-
 from app.store import ModelMetadata
 from app.workers.base import ModelWorker
-from app.workers.triton import TritonWorker
 from app.workers.torch_vision import TorchVisionWorker
 from app.workers.transformer import TransformerWorker
+from app.workers.triton import TritonWorker
+
 
 class ModelEngine:
-    workers = {} # {model_id: worker}
-    
     def __init__(self):
-        self.workers = {} 
-    
-    def get_worker(self, model_id: str) -> Optional[ModelWorker]:
+        self.workers = {}  # {model_id: worker}
+
+    def get_worker(self, model_id: str) -> ModelWorker | None:
         return self.workers.get(model_id)
-    
+
     def create_worker(self, model_metadata: ModelMetadata) -> ModelWorker:
         if model_metadata.id not in self.workers:
             if model_metadata.framework == "transformers":
@@ -26,7 +23,7 @@ class ModelEngine:
             else:
                 raise ValueError(f"Unsupported framework: {model_metadata.framework}")
         return self.workers[model_metadata.id]
-    
+
     def delete_worker(self, model_id: str):
         if model_id in self.workers:
             del self.workers[model_id]

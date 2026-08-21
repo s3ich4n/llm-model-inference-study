@@ -1,6 +1,7 @@
 import json
-from typing import Dict, Optional
+
 from pydantic import BaseModel
+
 
 class ModelMetadata(BaseModel):
     id: str
@@ -13,17 +14,17 @@ class ModelMetadata(BaseModel):
 
 class ModelStore:
     def __init__(self, config_path: str):
-        self.models: Dict[str, ModelMetadata] = {}
+        self.models: dict[str, ModelMetadata] = {}
         self._load_config(config_path)
-    
+
     def _load_config(self, config_path: str):
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
-            for model in config['models']:
-                self.models[model['id']] = ModelMetadata(**model)
-    
-    def get_model(self, model_id: str) -> Optional[ModelMetadata]:
+            for model in config["models"]:
+                self.models[model["id"]] = ModelMetadata(**model)
+
+    def get_model(self, model_id: str) -> ModelMetadata | None:
         return self.models.get(model_id)
-    
-    def list_models(self) -> Dict[str, ModelMetadata]:
-        return self.models 
+
+    def list_models(self) -> dict[str, ModelMetadata]:
+        return self.models

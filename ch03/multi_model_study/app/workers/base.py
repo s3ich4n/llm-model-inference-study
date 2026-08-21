@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Any, Dict
+from typing import Any
 
 import torch
 
@@ -7,7 +7,7 @@ import torch
 class ModelWorker(ABC):
     def __init__(self, model_metadata):
         self.model_metadata = model_metadata
-        self.model: Optional[torch.nn.Module] = None
+        self.model: torch.nn.Module | None = None
         self._load_model()
 
     @abstractmethod
@@ -15,5 +15,5 @@ class ModelWorker(ABC):
         pass
 
     @abstractmethod
-    def predict(self, input_data: Any) -> Dict[str, Any]:
+    def predict(self, input_data: Any) -> dict[str, Any]:
         pass
