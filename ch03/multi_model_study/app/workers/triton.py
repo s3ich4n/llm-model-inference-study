@@ -1,9 +1,11 @@
-from typing import Dict, Any
+import contextlib
+from typing import Any
 
 import numpy as np
 import requests
-from app.workers.base import ModelWorker
 from tritonclient import http as httpclient
+
+from app.workers.base import ModelWorker
 
 
 class TritonWorker(ModelWorker):
@@ -23,7 +25,7 @@ class TritonWorker(ModelWorker):
         if not self.client.is_model_ready(self.model_metadata.name):
             raise RuntimeError("Model is not ready after loading")
 
-    def predict(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def predict(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """Make prediction through Triton inference API
 
         Args:
@@ -43,11 +45,17 @@ class TritonWorker(ModelWorker):
                 try:
                     shape = data["shape"]
                     content = data["data"]
-                    array = np.array(content, dtype=np.float32).reshape(shape)  # Explicitly set dtype to float32
-                except:
-                    raise ValueError(f"Input {name} could not be converted to a numpy array")
+                    array = np.array(content, dtype=np.float32).reshape(
+                        shape
+                    )  # Explicitly set dtype to float32
+                except (KeyError, TypeError, ValueError) as exc:
+                    raise ValueError(
+                        f"Input {name} could not be converted to a numpy array"
+                    ) from exc
             else:
-                array = data.astype(np.float32)  # Ensure existing numpy array is float32
+                array = data.astype(
+                    np.float32
+                )  # Ensure existing numpy array is float32
 
             input_tensor = httpclient.InferInput(name, array.shape, "FP32")
             input_tensor.set_data_from_numpy(array)
@@ -60,20 +68,16 @@ class TritonWorker(ModelWorker):
         response = self.client.infer(
             model_name=self.model_metadata.name,
             inputs=inputs,
-            outputs=[httpclient.InferRequestedOutput(output_name)]
+            outputs=[httpclient.InferRequestedOutput(output_name)],
         )
 
         # Get predictions and convert numpy arrays to lists for JSON serialization
-        predictions = {
-            output_name: response.as_numpy(output_name).tolist()
-        }
+        predictions = {output_name: response.as_numpy(output_name).tolist()}
 
         return predictions
 
     def __del__(self):
         """Cleanup: unload model when worker is destroyed"""
-        try:
-            unload_url = f"http://{self.triton_url}/v2/repository/models/{self.model_metadata.name}/unload"
+        unload_url = f"http://{self.triton_url}/v2/repository/models/{self.model_metadata.name}/unload"
+        with contextlib.suppress(requests.RequestException):
             requests.post(unload_url)
-        except:
-            pass  # Ignore cleanup errors
