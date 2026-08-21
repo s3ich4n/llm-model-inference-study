@@ -28,6 +28,10 @@ python-preference = "system"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["."]
+markers = [
+    "gpu: CUDA가 있어야 도는 테스트",
+    "triton: Triton 서버(:8009)가 떠 있어야 도는 테스트",
+]
 log_cli = true
 log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
