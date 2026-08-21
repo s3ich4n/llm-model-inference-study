@@ -1,16 +1,12 @@
-import unittest
-from sympy import Array
-import torch
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
-import requests
-from fastapi.testclient import TestClient
-from app.server import app
-import json
 import os
-from PIL import Image
-import tritonclient.http as httpclient
-import tritonclient.utils as utils
+import unittest
+
 import numpy as np
+from PIL import Image
+from app.server import app
+from fastapi.testclient import TestClient
+from transformers import DistilBertForSequenceClassification
+
 
 class TestModelServing(unittest.TestCase):
     def setUp(self):
