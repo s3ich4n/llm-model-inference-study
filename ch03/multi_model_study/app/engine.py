@@ -1,6 +1,10 @@
-from app.store import ModelMetadata
-from app.worker import ModelWorker, TransformerWorker, TorchVisionWorker, TritonWorker
 from typing import Optional
+
+from app.store import ModelMetadata
+from app.workers.base import ModelWorker
+from app.workers.triton import TritonWorker
+from app.workers.torch_vision import TorchVisionWorker
+from app.workers.transformer import TransformerWorker
 
 class ModelEngine:
     workers = {} # {model_id: worker}
