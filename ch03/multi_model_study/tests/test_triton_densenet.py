@@ -1,10 +1,11 @@
-import unittest
-import requests
-import numpy as np
-from PIL import Image
-import tritonclient.http as httpclient
-import tritonclient.utils as utils
 import os
+import unittest
+
+import numpy as np
+import requests
+import tritonclient.http as httpclient
+from PIL import Image
+
 
 class TestTritonDenseNet(unittest.TestCase):
     def setUp(self):
