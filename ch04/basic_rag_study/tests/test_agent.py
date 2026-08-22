@@ -275,6 +275,22 @@ class TestProcessQueryWithPlanning:
         assert seen == ["", ""]
 
 
+class TestEmptyModelResponse:
+    def test_none_content_does_not_leak_into_the_final_response(
+        self,
+        container,
+        built_rag_system,
+        fake_openai,
+    ):
+        """모델이 빈 응답을 줘도 사용자에게 None이 보이면 안 된다."""
+        fake_openai.completion_text = None
+
+        result = container.agent().process_query("paging", use_planning=False)
+
+        assert result["success"] is True
+        assert result["final_response"] == ""
+
+
 class TestSearchKnowledgeBase:
     def test_passes_the_query_through(
         self,

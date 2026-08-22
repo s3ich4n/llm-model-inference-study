@@ -57,6 +57,20 @@ class TestGenerateResponse:
         assert call["max_completion_tokens"] == 10
         assert "temperature" not in call
 
+    def test_empty_content_becomes_an_empty_string(
+        self,
+        llm_manager,
+        fake_openai,
+    ):
+        """SDK의 message.content는 Optional[str]이다.
+
+        도구 호출만 하거나 길이 제한에 걸리면 None이 온다. 반환형이 str이라고
+        해놓고 None을 흘려보내면 최종 응답에 'None'이 그대로 찍힌다.
+        """
+        fake_openai.completion_text = None
+
+        assert llm_manager.generate_response("질문") == ""
+
     def test_api_failure_becomes_a_message_instead_of_an_exception(
         self,
         llm_manager,

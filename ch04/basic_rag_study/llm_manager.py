@@ -40,7 +40,10 @@ class LLMManager:
                 request["temperature"] = temperature
 
             response = self.client.chat.completions.create(**request)
-            return response.choices[0].message.content
+            # message.content는 Optional[str]이다.
+            # 모델이 도구 호출만 하거나
+            # 길이 제한에 걸리면 None이 오기 때문에 보정한다
+            return response.choices[0].message.content or ""
         except Exception as e:
             logger.error(f"Error generating OpenAI response: {e!s}")
             return f"Error generating response: {e!s}"
