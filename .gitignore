@@ -23,3 +23,6 @@ venv/*
 .env
 
 .idea/
+
+mise.local.toml
+mise.*.local.toml
