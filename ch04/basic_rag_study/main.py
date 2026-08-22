@@ -17,7 +17,7 @@ def _report_settings_error(
     for err in error.errors():
         field = ".".join(str(part) for part in err["loc"]) or "(전체)"
         print(f"   {field.upper()}: {err['msg']}")
-    print("\n💡 env_example.txt를 .env로 복사한 뒤 값을 채우면 됩니다.")
+    print("\n💡 env_example.txt의 환경변수들을 mise.local.toml 형식으로 구성해주세요.")
 
 
 def main():
