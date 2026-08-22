@@ -13,3 +13,7 @@ repos:
       - id: ruff-format
         name: ruff-format (ch03/multi_model_study)
         files: ^ch03/multi_model_study/
+      - id: ruff-check
+        name: ruff (ch04/basic_rag_study)
+        files: ^ch04/basic_rag_study/
+        args: [--fix]

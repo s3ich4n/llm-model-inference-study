@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import List, Dict, Any
+from typing import Any
+
 from llm_manager import LLMManager
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ class Planner:
             "generate_analysis"
         ]
     
-    def create_plan(self, query: str) -> Dict[str, Any]:
+    def create_plan(self, query: str) -> dict[str, Any]:
         """Create an execution plan for the given query using OpenAI."""
         logger.info(f"Creating plan for query: {query}")
         
@@ -33,11 +34,11 @@ class Planner:
             return plan
             
         except Exception as e:
-            logger.error(f"Error creating plan: {str(e)}")
+            logger.error(f"Error creating plan: {e!s}")
             # Fallback to default plan
             return self._create_fallback_plan(query)
     
-    def _parse_plan_response(self, response: str) -> Dict[str, Any]:
+    def _parse_plan_response(self, response: str) -> dict[str, Any]:
         """Parse the OpenAI response to extract the plan."""
         try:
             # Try to extract JSON from the response
@@ -61,11 +62,11 @@ class Planner:
                 raise ValueError("No JSON found in response")
                 
         except (json.JSONDecodeError, ValueError) as e:
-            logger.warning(f"Failed to parse plan response: {str(e)}")
+            logger.warning(f"Failed to parse plan response: {e!s}")
             logger.warning(f"Raw response: {response}")
             raise
     
-    def _create_fallback_plan(self, query: str) -> Dict[str, Any]:
+    def _create_fallback_plan(self, query: str) -> dict[str, Any]:
         """Create a fallback plan when OpenAI planning fails."""
         logger.info("Creating fallback plan")
         
@@ -103,7 +104,7 @@ class Planner:
         
         return plan
     
-    def validate_plan(self, plan: Dict[str, Any]) -> bool:
+    def validate_plan(self, plan: dict[str, Any]) -> bool:
         """Validate that the plan contains valid actions."""
         if not isinstance(plan, dict):
             return False
@@ -119,7 +120,7 @@ class Planner:
         
         return True
     
-    def get_action_sequence(self, plan: Dict[str, Any]) -> List[str]:
+    def get_action_sequence(self, plan: dict[str, Any]) -> list[str]:
         """Extract the action sequence from a plan."""
         if self.validate_plan(plan):
             return plan["plan"]

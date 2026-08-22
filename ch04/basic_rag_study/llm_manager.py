@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
 from openai import OpenAI
 
 from config import Config
@@ -7,33 +8,30 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 class LLMManager:
-    def __init__(self):
-        self.config = Config()
-        if not self.config.OPENAI_API_KEY:
-            raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
-        
-        self.client = OpenAI(api_key=self.config.OPENAI_API_KEY)
+    def __init__(self, config: Config, client: OpenAI):
+        self.config = config
+        self.client = client
         logger.info("LLM Manager initialized")
     
-    def generate_response(self, prompt: str, max_tokens: Optional[int] = None, 
-                         temperature: Optional[float] = None) -> str:
+    def generate_response(self, prompt: str, max_tokens: int | None = None, 
+                         temperature: float | None = None) -> str:
         """Generate response using OpenAI."""
         if max_tokens is None:
-            max_tokens = self.config.MAX_TOKENS
+            max_tokens = self.config.max_tokens
         if temperature is None:
-            temperature = self.config.TEMPERATURE
+            temperature = self.config.temperature
             
         try:
             response = self.client.chat.completions.create(
-                model=self.config.LLM_MODEL,
+                model=self.config.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
                 temperature=temperature
             )
             return response.choices[0].message.content
         except Exception as e:
-            logger.error(f"Error generating OpenAI response: {str(e)}")
-            return f"Error generating response: {str(e)}"
+            logger.error(f"Error generating OpenAI response: {e!s}")
+            return f"Error generating response: {e!s}"
     
     def create_planning_prompt(self, query: str, available_actions: list) -> str:
         """Create a prompt for the planner to determine the best action sequence."""
@@ -82,7 +80,7 @@ Answer:
 """
         return prompt
     
-    def create_profile_based_prompt(self, query: str, context: str, user_profile: Dict[str, Any]) -> str:
+    def create_profile_based_prompt(self, query: str, context: str, user_profile: dict[str, Any]) -> str:
         """Create a prompt that considers the user's profile for personalized responses."""
         expertise_level = user_profile.get("expertise_level", "intermediate")
         background = user_profile.get("background", "technical")

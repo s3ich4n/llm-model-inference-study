@@ -6,17 +6,11 @@ This module contains basic tests for the RAG system functionality
 using real OpenAI API calls and actual PDF files from knowledge_files folder.
 """
 
+import sys
 import unittest
-import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv(override=True)
-
-# Import the RAG system
-from rag_system import RAGSystem
-from config import Config
+from containers import Container
 
 
 class TestRAGSystemReal(unittest.TestCase):
@@ -24,36 +18,39 @@ class TestRAGSystemReal(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        # Check if OpenAI API key is available
-        if not os.getenv('OPENAI_API_KEY'):
-            self.skipTest("OpenAI API key not found in environment. Please set OPENAI_API_KEY in .env file.")
+        # 컨테이너가 .env를 읽는다. 키가 없으면 load_config()가 ValueError를 던진다.
+        self.container = Container()
+        try:
+            self.config = self.container.config()
+        except ValueError as e:
+            self.skipTest(str(e))
         
         # Check if knowledge_files folder exists
-        self.knowledge_folder = Path("./knowledge_files")
+        self.knowledge_folder = Path(self.config.knowledge_folder)
         if not self.knowledge_folder.exists():
             self.skipTest("knowledge_files folder not found. Please ensure PDF files are in the knowledge_files folder.")
         
         # Initialize RAG system
         try:
-            self.rag_system = RAGSystem()
+            self.rag_system = self.container.rag_system()
             print("✅ RAG system initialized successfully")
         except Exception as e:
             self.skipTest(f"Failed to initialize RAG system: {e}")
     
     def test_config_loading(self):
         """Test that configuration loads correctly."""
-        config = Config()
+        config = self.config
         
         # Test that required config values exist
-        self.assertIsNotNone(config.LLM_MODEL)
-        self.assertIsNotNone(config.EMBEDDING_MODEL)
-        self.assertIsNotNone(config.KNOWLEDGE_FOLDER)
-        self.assertIsNotNone(config.CHUNK_SIZE)
-        self.assertIsNotNone(config.CHUNK_OVERLAP)
+        self.assertIsNotNone(config.llm_model)
+        self.assertIsNotNone(config.embedding_model)
+        self.assertIsNotNone(config.knowledge_folder)
+        self.assertIsNotNone(config.chunk_size)
+        self.assertIsNotNone(config.chunk_overlap)
         
-        print(f"✅ Config loaded: LLM={config.LLM_MODEL}, Embedding={config.EMBEDDING_MODEL}")
-        print(f"✅ Knowledge folder: {config.KNOWLEDGE_FOLDER}")
-        print(f"✅ Chunk size: {config.CHUNK_SIZE}, Overlap: {config.CHUNK_OVERLAP}")
+        print(f"✅ Config loaded: LLM={config.llm_model}, Embedding={config.embedding_model}")
+        print(f"✅ Knowledge folder: {config.knowledge_folder}")
+        print(f"✅ Chunk size: {config.chunk_size}, Overlap: {config.chunk_overlap}")
     
     def test_pdf_files_exist(self):
         """Test that PDF files exist in the knowledge_files folder."""
@@ -287,7 +284,9 @@ def run_real_rag_tests():
     test_suite = unittest.TestSuite()
     
     # Add test cases
-    test_suite.addTest(unittest.makeSuite(TestRAGSystemReal))
+    test_suite.addTests(
+        unittest.TestLoader().loadTestsFromTestCase(TestRAGSystemReal)
+    )
     
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2)
@@ -315,4 +314,4 @@ def run_real_rag_tests():
 
 if __name__ == "__main__":
     success = run_real_rag_tests()
-    exit(0 if success else 1) 
+    sys.exit(0 if success else 1) 

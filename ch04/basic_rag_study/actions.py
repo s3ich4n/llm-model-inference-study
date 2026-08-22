@@ -1,17 +1,41 @@
 import logging
-from typing import Dict, Any, Optional
-from rag_system import RAGSystem
+from typing import Any
+
+from config import Config
 from llm_manager import LLMManager
+from rag_system import RAGSystem
 
 logger = logging.getLogger(__name__)
 
+
 class ActionExecutor:
-    def __init__(self, rag_system: RAGSystem, llm_manager: LLMManager):
+    def __init__(
+        self,
+        rag_system: RAGSystem,
+        llm_manager: LLMManager,
+        config: Config,
+    ):
         self.rag_system = rag_system
         self.llm_manager = llm_manager
+        self.config = config
+        self.descriptions = {
+            "query_rag_with_context":
+                "Query the knowledge base and generate a response based on retrieved context",
+            "generate_profile_based_response":
+                "Generate a personalized response based on the user's profile and retrieved context",
+            "generate_summary":
+                "Generate a concise summary of the retrieved information",
+            "generate_analysis":
+                "Generate a detailed analysis of the retrieved information",
+        }
     
-    def execute_action(self, action_name: str, query: str, context: str = "", 
-                      user_profile: Optional[Dict[str, Any]] = None) -> str:
+    def execute_action(
+        self,
+        action_name: str,
+        query: str,
+        context: str = "",
+        user_profile: dict[str, Any] | None = None,
+    ) -> str:
         """Execute a specific action based on the action name."""
         logger.info(f"Executing action: {action_name}")
         
@@ -43,15 +67,18 @@ class ActionExecutor:
         logger.info("Successfully generated RAG-based response")
         return response
     
-    def generate_profile_based_response(self, query: str, context: str = "", 
-                                      user_profile: Optional[Dict[str, Any]] = None) -> str:
+    def generate_profile_based_response(
+        self,
+        query: str,
+        context: str = "",
+        user_profile: dict[str, Any] | None = None,
+    ) -> str:
         """Generate a response based on the user's profile."""
         logger.info("Executing generate_profile_based_response action")
         
         # Use default profile if none provided
         if user_profile is None:
-            from config import Config
-            user_profile = Config.DEFAULT_USER_PROFILE
+            user_profile = self.config.default_user_profile
         
         # If no context provided, get it from RAG system
         if not context:
@@ -101,21 +128,19 @@ class ActionExecutor:
         
         logger.info("Successfully generated analysis")
         return response
-    
+
     def get_action_description(self, action_name: str) -> str:
         """Get a description of what an action does."""
-        descriptions = {
-            "query_rag_with_context": "Query the knowledge base and generate a response based on retrieved context",
-            "generate_profile_based_response": "Generate a personalized response based on the user's profile and retrieved context",
-            "generate_summary": "Generate a concise summary of the retrieved information",
-            "generate_analysis": "Generate a detailed analysis of the retrieved information"
-        }
-        return descriptions.get(action_name, "Unknown action")
+        return self.descriptions.get(action_name, "Unknown action")
     
     def validate_action_prerequisites(self, action_name: str) -> bool:
         """Validate that prerequisites are met for an action."""
-        if action_name in ["query_rag_with_context", "generate_profile_based_response", 
-                          "generate_summary", "generate_analysis"]:
+        if action_name in [
+            "query_rag_with_context",
+            "generate_profile_based_response",
+            "generate_summary",
+            "generate_analysis",
+        ]:
             return len(self.rag_system.documents) > 0
         else:
-            return False 
+            return False

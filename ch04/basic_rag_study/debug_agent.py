@@ -6,22 +6,8 @@ This script allows you to debug specific parts of the agent functionality
 by setting breakpoints and testing individual components.
 """
 
-import os
-import sys
-from dotenv import load_dotenv
+from containers import container
 
-# Load environment variables
-load_dotenv(override=True)
-
-# Add current directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from agent import Agent
-from rag_system import RAGSystem
-from llm_manager import LLMManager
-from planner import Planner
-from actions import ActionExecutor
-from config import Config
 
 def debug_agent_initialization():
     """Debug agent initialization."""
@@ -32,7 +18,8 @@ def debug_agent_initialization():
     breakpoint()  # This will pause execution here
     
     try:
-        agent = Agent()
+        # 컨테이너가 .env를 읽고 구성 요소를 조립한다
+        agent = container.agent()
         print("✅ Agent initialized successfully")
         return agent
     except Exception as e:
@@ -68,7 +55,7 @@ def debug_query_processing(agent, query: str = "What is artificial intelligence?
     
     try:
         result = agent.process_query(query)
-        print(f"✅ Query processed successfully")
+        print("✅ Query processed successfully")
         print(f"📋 Result: {result}")
         
         if result["success"]:
@@ -129,7 +116,7 @@ def debug_actions(agent):
     try:
         query = "Explain database queries"
         result = agent.action_executor.query_rag_with_context(query)
-        print(f"✅ Action executed successfully")
+        print("✅ Action executed successfully")
         print(f"📋 Result: {result[:200]}...")
         
     except Exception as e:

@@ -1,36 +1,31 @@
-import os
 import logging
-import numpy as np
-from typing import List, Dict, Any, Tuple
 from pathlib import Path
-import json
+from typing import Any
+
+import numpy as np
+import tiktoken
 from openai import OpenAI
 from PyPDF2 import PdfReader
-import tiktoken
 
 from config import Config
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RAGSystem:
-    def __init__(self):
-        self.config = Config()
-        if not self.config.OPENAI_API_KEY:
-            raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
-        
-        self.client = OpenAI(api_key=self.config.OPENAI_API_KEY)
-        self.encoding = tiktoken.encoding_for_model(self.config.LLM_MODEL)
+    def __init__(self, config: Config, client: OpenAI):
+        self.config = config
+        self.client = client
+        self.encoding = tiktoken.encoding_for_model(self.config.llm_model)
         
         # In-memory storage for embeddings and documents
         self.documents = []
         self.embeddings = []
         self.metadata = []
         
-    def load_pdfs(self, folder_path: str = None) -> List[Dict[str, Any]]:
+    def load_pdfs(self, folder_path: str | None = None) -> list[dict[str, Any]]:
         """Load all PDF files from the knowledge folder and split into chunks."""
         if folder_path is None:
-            folder_path = self.config.KNOWLEDGE_FOLDER
+            folder_path = self.config.knowledge_folder
             
         documents = []
         pdf_files = list(Path(folder_path).glob("*.pdf"))
@@ -62,34 +57,34 @@ class RAGSystem:
                 logger.info(f"Successfully processed {pdf_file.name} into {len(chunks)} chunks")
                 
             except Exception as e:
-                logger.error(f"Error processing {pdf_file.name}: {str(e)}")
+                logger.error(f"Error processing {pdf_file.name}: {e!s}")
                 continue
         
         return documents
     
-    def _split_text(self, text: str) -> List[str]:
+    def _split_text(self, text: str) -> list[str]:
         """Split text into chunks based on token count."""
         tokens = self.encoding.encode(text)
         chunks = []
         
-        for i in range(0, len(tokens), self.config.CHUNK_SIZE - self.config.CHUNK_OVERLAP):
-            chunk_tokens = tokens[i:i + self.config.CHUNK_SIZE]
+        for i in range(0, len(tokens), self.config.chunk_size - self.config.chunk_overlap):
+            chunk_tokens = tokens[i:i + self.config.chunk_size]
             chunk_text = self.encoding.decode(chunk_tokens)
             if chunk_text.strip():
                 chunks.append(chunk_text.strip())
         
         return chunks
     
-    def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    def get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Get embeddings for a list of texts using OpenAI."""
         try:
             response = self.client.embeddings.create(
-                model=self.config.EMBEDDING_MODEL,
+                model=self.config.embedding_model,
                 input=texts
             )
             return [embedding.embedding for embedding in response.data]
         except Exception as e:
-            logger.error(f"Error getting embeddings: {str(e)}")
+            logger.error(f"Error getting embeddings: {e!s}")
             raise
     
     def build_vector_db(self, force_rebuild: bool = False):
@@ -117,13 +112,13 @@ class RAGSystem:
         
         logger.info(f"Vector database built with {len(documents)} documents")
     
-    def cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Calculate cosine similarity between two vectors."""
         vec1 = np.array(vec1)
         vec2 = np.array(vec2)
         return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
     
-    def search(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, k: int = 5) -> list[dict[str, Any]]:
         """Search the vector database for relevant documents."""
         if not self.documents:
             raise ValueError("Vector database not built. Call build_vector_db() first.")

@@ -140,7 +140,7 @@ cp /path/to/your/documents/*.pdf knowledge_files/
 
 ```bash
 # Run in interactive mode
-python agent.py
+python main.py
 ```
 
 The agent will:
@@ -210,12 +210,12 @@ print(result["final_response"])
 ### Run All Tests
 
 ```bash
-# Run the main test suite
-python test_agent.py
+# Run the whole suite
+pytest
 
 # Run specific test files
-python test_rag_system.py
-python test_api_key.py
+pytest tests/test_rag_system.py
+python tests/test_api_key.py
 ```
 
 ### Test Individual Components
@@ -241,10 +241,10 @@ status = agent.get_system_status()
 
 ```bash
 # Validate API key
-python test_api_key.py
+python tests/test_api_key.py
 
 # Check environment setup
-python -c "from config import Config; print(Config().OPENAI_API_KEY[:10] + '...')"
+python -c "from config import load_config; print(load_config().openai_api_key[:10] + '...')"
 ```
 
 ## How to Debug the Agent
@@ -378,7 +378,8 @@ debug_with_condition("This is a very long query that should trigger the debugger
 
 ```python
 # Test API key validity
-from test_api_key import test_openai_api_key
+from tests.test_api_key import test_openai_api_key
+
 test_openai_api_key()
 ```
 

@@ -6,8 +6,9 @@ This script demonstrates how to use the agent for querying
 information from PDF files in the knowledge folder.
 """
 
-from agent import Agent
 import logging
+
+from containers import container
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +18,7 @@ def example_basic_usage():
     print("=== Basic Usage Example ===")
     
     # Initialize the agent
-    agent = Agent()
+    agent = container.agent()
     
     # Build knowledge base
     print("Building knowledge base...")
@@ -53,7 +54,7 @@ def example_custom_user_profile():
         "preferred_detail_level": "high"
     }
     
-    agent = Agent(user_profile=custom_profile)
+    agent = container.agent(user_profile=custom_profile)
     
     # Build knowledge base
     agent.build_knowledge_base()
@@ -73,7 +74,7 @@ def example_direct_search():
     """Example of direct knowledge base search."""
     print("\n=== Direct Search Example ===")
     
-    agent = Agent()
+    agent = container.agent()
     agent.build_knowledge_base()
     
     query = "database queries"
@@ -93,7 +94,7 @@ def example_system_status():
     """Example of checking system status."""
     print("\n=== System Status Example ===")
     
-    agent = Agent()
+    agent = container.agent()
     agent.build_knowledge_base()
     status = agent.get_system_status()
     
@@ -101,38 +102,11 @@ def example_system_status():
     for component, info in status.items():
         print(f"  {component}: {info}")
 
-def example_save_load_knowledge_base():
-    """Example of saving and loading the knowledge base."""
-    print("\n=== Save/Load Knowledge Base Example ===")
-    
-    agent = Agent()
-    
-    # Build and save knowledge base
-    print("Building knowledge base...")
-    agent.build_knowledge_base()
-    
-    print("Saving knowledge base...")
-    agent.save_knowledge_base("my_knowledge_base.json")
-    
-    # Create new agent and load knowledge base
-    print("Creating new agent and loading knowledge base...")
-    new_agent = Agent()
-    new_agent.load_knowledge_base("my_knowledge_base.json")
-    
-    # Test query
-    query = "What is 5-level paging?"
-    result = new_agent.process_query(query)
-    
-    if result["success"]:
-        print(f"✅ Query successful: {result['final_response'][:100]}...")
-    else:
-        print(f"❌ Query failed: {result['final_response']}")
-
 def example_different_actions():
     """Example of different action types."""
     print("\n=== Different Actions Example ===")
     
-    agent = Agent()
+    agent = container.agent()
     agent.build_knowledge_base()
     
     # Test different types of queries
@@ -164,13 +138,12 @@ def main():
         example_custom_user_profile()
         example_direct_search()
         example_system_status()
-        example_save_load_knowledge_base()
         example_different_actions()
         
         print("\n✅ All examples completed successfully!")
         
     except Exception as e:
-        print(f"\n❌ Error running examples: {str(e)}")
+        print(f"\n❌ Error running examples: {e!s}")
         print("\n💡 Make sure you have:")
         print("   1. Installed all requirements: pip install -r requirements.txt")
         print("   2. Set up your OpenAI API key in .env file")

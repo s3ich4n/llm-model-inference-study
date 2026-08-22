@@ -4,6 +4,8 @@ Simple script to test OpenAI API key and diagnose issues.
 """
 
 import os
+import sys
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -73,7 +75,7 @@ def test_api_key():
         return True
         
     except Exception as e:
-        print(f"\n❌ API test failed: {str(e)}")
+        print(f"\n❌ API test failed: {e!s}")
         
         # Provide specific guidance based on error
         if "401" in str(e) and "invalid_api_key" in str(e):
@@ -151,13 +153,13 @@ def check_environment():
     
     # Check required packages
     try:
-        import openai
+        import openai  # noqa: F401
         print("✅ openai package installed")
     except ImportError:
         print("❌ openai package not installed")
     
     try:
-        import dotenv
+        import dotenv  # noqa: F401
         print("✅ python-dotenv package installed")
     except ImportError:
         print("❌ python-dotenv package not installed")
@@ -171,4 +173,4 @@ if __name__ == "__main__":
         print("   Run: python test_rag_system_simple.py")
     else:
         print("\n🔧 Please fix the API key issue before running tests")
-        exit(1) 
+        sys.exit(1) 

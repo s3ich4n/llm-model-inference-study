@@ -1,27 +1,33 @@
 import logging
-from typing import Dict, Any, Optional, List
-from rag_system import RAGSystem
-from llm_manager import LLMManager
-from planner import Planner
+from typing import Any
+
 from actions import ActionExecutor
 from config import Config
+from llm_manager import LLMManager
+from planner import Planner
+from rag_system import RAGSystem
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class Agent:
-    def __init__(self, user_profile: Optional[Dict[str, Any]] = None):
-        """Initialize the Agent with all its components."""
-        self.config = Config()
-        self.user_profile = user_profile or self.config.DEFAULT_USER_PROFILE
-        
-        # Initialize components
-        logger.info("Initializing Agent components...")
-        self.rag_system = RAGSystem()
-        self.llm_manager = LLMManager()
-        self.planner = Planner(self.llm_manager)
-        self.action_executor = ActionExecutor(self.rag_system, self.llm_manager)
-        
+    """구성 요소를 직접 만들지 않고 컨테이너에서 받아 쓰는 에이전트."""
+
+    def __init__(
+        self,
+        config: Config,
+        rag_system: RAGSystem,
+        llm_manager: LLMManager,
+        planner: Planner,
+        action_executor: ActionExecutor,
+        user_profile: dict[str, Any] | None = None,
+    ):
+        self.config = config
+        self.rag_system = rag_system
+        self.llm_manager = llm_manager
+        self.planner = planner
+        self.action_executor = action_executor
+        self.user_profile = user_profile or dict(self.config.default_user_profile)
+
         logger.info("Agent initialized successfully")
     
     def build_knowledge_base(self, force_rebuild: bool = False):
@@ -30,7 +36,7 @@ class Agent:
         self.rag_system.build_vector_db(force_rebuild=force_rebuild)
         logger.info("Knowledge base built successfully")
     
-    def process_query(self, query: str, use_planning: bool = True) -> Dict[str, Any]:
+    def process_query(self, query: str, use_planning: bool = True) -> dict[str, Any]:
         """Process a user query and return a comprehensive response."""
         logger.info(f"Processing query: {query}")
         
@@ -66,17 +72,17 @@ class Agent:
                 }
                 
         except Exception as e:
-            logger.error(f"Error processing query: {str(e)}")
+            logger.error(f"Error processing query: {e!s}")
             return {
                 "query": query,
                 "plan": None,
                 "results": [],
-                "final_response": f"Error processing query: {str(e)}",
+                "final_response": f"Error processing query: {e!s}",
                 "success": False,
                 "error": str(e)
             }
     
-    def _execute_action_sequence(self, query: str, action_sequence: List[str]) -> List[str]:
+    def _execute_action_sequence(self, query: str, action_sequence: list[str]) -> list[str]:
         """Execute a sequence of actions and return results."""
         results = []
         context = ""
@@ -104,35 +110,35 @@ class Agent:
                 logger.info(f"Action {action} completed successfully")
                 
             except Exception as e:
-                logger.error(f"Error executing action {action}: {str(e)}")
-                results.append(f"Error in action {action}: {str(e)}")
+                logger.error(f"Error executing action {action}: {e!s}")
+                results.append(f"Error in action {action}: {e!s}")
         
         return results
     
-    def update_user_profile(self, new_profile: Dict[str, Any]):
+    def update_user_profile(self, new_profile: dict[str, Any]):
         """Update the user profile."""
         self.user_profile.update(new_profile)
         logger.info(f"Updated user profile: {self.user_profile}")
     
-    def get_user_profile(self) -> Dict[str, Any]:
+    def get_user_profile(self) -> dict[str, Any]:
         """Get the current user profile."""
         return self.user_profile.copy()
     
-    def search_knowledge_base(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    def search_knowledge_base(self, query: str, k: int = 5) -> list[dict[str, Any]]:
         """Search the knowledge base directly."""
         return self.rag_system.search(query, k)
     
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get the current status of all system components."""
         return {
             "rag_system": {
                 "documents_loaded": len(self.rag_system.documents),
                 "embeddings_available": len(self.rag_system.embeddings),
-                "knowledge_folder": self.config.KNOWLEDGE_FOLDER
+                "knowledge_folder": self.config.knowledge_folder
             },
             "llm_manager": {
-                "model": self.config.LLM_MODEL,
-                "embedding_model": self.config.EMBEDDING_MODEL
+                "model": self.config.llm_model,
+                "embedding_model": self.config.embedding_model
             },
             "user_profile": self.user_profile,
             "available_actions": self.planner.available_actions
@@ -167,34 +173,4 @@ class Agent:
                 print("\n👋 Goodbye!")
                 break
             except Exception as e:
-                print(f"\n❌ Unexpected error: {str(e)}")
-
-
-def main():
-    """Main function to run the agent."""
-    # Load .env file if it exists
-    import os
-    from pathlib import Path
-    
-    env_file = Path(".env")
-    if env_file.exists():
-        print("📄 Loading environment variables from .env file...")
-        from dotenv import load_dotenv
-        load_dotenv(override=True)
-        print("✅ Environment variables loaded successfully")
-    else:
-        print("⚠️  No .env file found. Using system environment variables.")
-    
-    # Example usage
-    agent = Agent()
-    
-    # Build knowledge base (this will process PDFs and create embeddings)
-    print("🔨 Building knowledge base from PDF files...")
-    agent.build_knowledge_base()
-    
-    # Run in simple interactive mode
-    agent.interactive_mode()
-
-
-if __name__ == "__main__":
-    main() 
+                print(f"\n❌ Unexpected error: {e!s}")

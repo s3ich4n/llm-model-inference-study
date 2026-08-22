@@ -6,9 +6,8 @@ This script tests the basic functionality of the agent
 without requiring external API keys or model downloads.
 """
 
-import os
-import sys
 import logging
+import sys
 from pathlib import Path
 
 # Set up logging
@@ -19,22 +18,22 @@ def test_imports():
     print("🔍 Testing imports...")
     
     try:
-        from config import Config
+        from config import load_config  # noqa: F401
         print("✅ Config imported successfully")
         
-        from rag_system import RAGSystem
+        from rag_system import RAGSystem  # noqa: F401
         print("✅ RAGSystem imported successfully")
         
-        from llm_manager import LLMManager
+        from llm_manager import LLMManager  # noqa: F401
         print("✅ LLMManager imported successfully")
         
-        from planner import Planner
+        from planner import Planner  # noqa: F401
         print("✅ Planner imported successfully")
         
-        from actions import ActionExecutor
+        from actions import ActionExecutor  # noqa: F401
         print("✅ ActionExecutor imported successfully")
         
-        from agent import Agent
+        from agent import Agent  # noqa: F401
         print("✅ Agent imported successfully")
         
         return True
@@ -48,14 +47,14 @@ def test_config():
     print("\n🔍 Testing configuration...")
     
     try:
-        from config import Config
-        config = Config()
+        from config import load_mock_config
+        config = load_mock_config()
         
-        print(f"✅ LLM Model: {config.LLM_MODEL}")
-        print(f"✅ Embedding Model: {config.EMBEDDING_MODEL}")
-        print(f"✅ Knowledge Folder: {config.KNOWLEDGE_FOLDER}")
-        print(f"✅ Chunk Size: {config.CHUNK_SIZE}")
-        print(f"✅ Default User Profile: {config.DEFAULT_USER_PROFILE}")
+        print(f"✅ LLM Model: {config.llm_model}")
+        print(f"✅ Embedding Model: {config.embedding_model}")
+        print(f"✅ Knowledge Folder: {config.knowledge_folder}")
+        print(f"✅ Chunk Size: {config.chunk_size}")
+        print(f"✅ Default User Profile: {config.default_user_profile}")
         
         return True
         
@@ -88,7 +87,6 @@ def test_rag_system_init():
     print("\n🔍 Testing RAG system initialization...")
     
     try:
-        from rag_system import RAGSystem
         
         # Test basic initialization (this will fail without API key, but that's expected)
         print("✅ RAGSystem class can be imported")
@@ -111,7 +109,6 @@ def test_agent_creation():
     print("\n🔍 Testing agent creation...")
     
     try:
-        from agent import Agent
         
         # Test agent creation (this will fail if OpenAI API key is not configured, but that's expected)
         print("✅ Agent class can be imported")

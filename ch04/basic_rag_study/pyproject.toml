@@ -11,6 +11,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "tiktoken>=0.5.2",
     "requests>=2.31.0",
+    "dependency-injector==4.49.1",
 ]
 
 [tool.uv]
@@ -25,3 +26,10 @@ dev = [
     "pytest>=8.0.0",
     "ruff>=0.16.3",
 ]
+
+[tool.ruff.lint]
+# 예외를 잡아 로그와 안내 메시지로 바꾸고 계속 진행하는 것이 이 학습용 에이전트의 기본 동작이다
+ignore = ["BLE001"]
+
+[tool.ruff.lint.per-file-ignores]
+"debug_agent.py" = ["T100"]  # breakpoint()를 놓는 것이 이 스크립트의 목적
