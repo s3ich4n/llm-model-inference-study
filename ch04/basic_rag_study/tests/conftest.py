@@ -59,10 +59,13 @@ class FakeOpenAI:
         *,
         input: list[str],
         model: str,
-        **_kwargs,
+        encoding_format: str | None = None,
+        dimensions: int | None = None,
+        user: str | None = None,
     ):
         self.embedding_calls.append(list(input))
         return SimpleNamespace(
+            object="list",
             data=[
                 SimpleNamespace(
                     embedding=_deterministic_embedding(text),
@@ -72,15 +75,31 @@ class FakeOpenAI:
                 for index, text in enumerate(input)
             ],
             model=model,
-            object="list",
+            usage=SimpleNamespace(prompt_tokens=0, total_tokens=0),
         )
 
     def _create_completion(
         self,
-        **kwargs,
+        *,
+        model: str,
+        messages: list[dict],
+        max_completion_tokens: int,
+        reasoning_effort: str | None = None,
+        temperature: float | None = None,
     ):
+        kwargs = {
+            "model": model,
+            "messages": messages,
+            "max_completion_tokens": max_completion_tokens,
+            "reasoning_effort": reasoning_effort,
+        }
+        if temperature is not None:
+            kwargs["temperature"] = temperature
         self.completion_calls.append(kwargs)
         return SimpleNamespace(
+            id="chatcmpl-fake",
+            object="chat.completion",
+            created=0,
             choices=[
                 SimpleNamespace(
                     finish_reason="stop",
@@ -91,7 +110,12 @@ class FakeOpenAI:
                     ),
                 ),
             ],
-            model=kwargs.get("model"),
+            model=model,
+            usage=SimpleNamespace(
+                prompt_tokens=0,
+                completion_tokens=0,
+                total_tokens=0,
+            ),
         )
 
 

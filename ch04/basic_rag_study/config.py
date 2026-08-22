@@ -35,7 +35,8 @@ class Settings(BaseSettings):
     # 기본값이 없으므로 없으면 ValidationError가 난다
     openai_api_key: str
 
-    llm_model: str = "gpt-4.1-nano"
+    # GPT-5.6 Luna is the lowest-cost GPT-5.6 model for high-volume workloads.
+    llm_model: str = "gpt-5.6-luna"
     embedding_model: str = "text-embedding-3-small"
     vector_db_path: str = "./vector_db"
     knowledge_folder: str = "./knowledge_files"
@@ -46,7 +47,9 @@ class Settings(BaseSettings):
     chunk_size: int = Field(default=1000, ge=1)
     chunk_overlap: int = Field(default=200, ge=0)
     max_tokens: int = Field(default=4096, ge=1)
+    # Kept for compatibility with older models. GPT-5.6 requests omit it.
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    reasoning_effort: Literal["none", "low", "medium", "high", "xhigh", "max"] = "none"
 
     default_user_profile: dict[str, str] = Field(
         default_factory=lambda: dict(DEFAULT_USER_PROFILE),
@@ -88,7 +91,7 @@ def load_mock_settings() -> Settings:
     return Settings(
         _env_file=None,
         openai_api_key="sk-test-mock-key",
-        llm_model="gpt-4.1-nano",
+        llm_model="gpt-5.6-luna",
         embedding_model="text-embedding-3-small",
         vector_db_path="./vector_db",
         log_level="INFO",
@@ -97,4 +100,5 @@ def load_mock_settings() -> Settings:
         chunk_overlap=200,
         max_tokens=4096,
         temperature=0.7,
+        reasoning_effort="none",
     )

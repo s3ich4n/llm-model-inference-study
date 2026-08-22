@@ -19,7 +19,12 @@ class RAGSystem:
     ):
         self.settings = settings
         self.client = client
-        self.encoding = tiktoken.encoding_for_model(self.settings.llm_model)
+        try:
+            self.encoding = tiktoken.encoding_for_model(self.settings.llm_model)
+        except KeyError:
+            # New model aliases may appear before tiktoken knows their exact
+            # name. o200k_base is the appropriate modern fallback.
+            self.encoding = tiktoken.get_encoding("o200k_base")
         
         # In-memory storage for embeddings and documents
         self.documents = []
@@ -222,4 +227,4 @@ class RAGSystem:
     #     self.embeddings = data["embeddings"]
     #     self.metadata = data["metadata"]
         
-    #     logger.info(f"Vector database loaded from {filepath} with {len(self.documents)} documents") 
+    #     logger.info(f"Vector database loaded from {filepath} with {len(self.documents)} documents")

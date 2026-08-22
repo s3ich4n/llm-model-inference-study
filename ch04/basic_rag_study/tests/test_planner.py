@@ -164,11 +164,12 @@ class TestCreatePlan:
         # 예외를 밖으로 던지지 않고 규칙 기반 계획으로 넘어간다
         assert plan["plan"] == ["query_rag_with_context", "generate_summary"]
 
-    def test_planning_uses_a_low_temperature(
+    def test_planning_uses_no_reasoning_tokens_for_low_cost(
         self,
         container,
         fake_openai,
     ):
         container.planner().create_plan("What is paging?")
 
-        assert fake_openai.completion_calls[0]["temperature"] == 0.3
+        assert fake_openai.completion_calls[0]["reasoning_effort"] == "none"
+        assert "temperature" not in fake_openai.completion_calls[0]

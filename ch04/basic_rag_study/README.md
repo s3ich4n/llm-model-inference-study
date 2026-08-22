@@ -448,10 +448,11 @@ For detailed debugging instructions, see `DEBUG_GUIDE.md` in the repository.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OPENAI_API_KEY` | Required | Your OpenAI API key |
-| `LLM_MODEL` | `gpt-4.1-nano` | LLM model for planning and responses |
+| `LLM_MODEL` | `gpt-5.6-luna` | Lowest-cost GPT-5.6 model for planning and responses |
 | `EMBEDDING_MODEL` | `text-embedding-3-small` | Model for document embeddings |
 | `MAX_TOKENS` | `4096` | Maximum tokens for responses |
 | `TEMPERATURE` | `0.7` | Response creativity (0.0-2.0) |
+| `REASONING_EFFORT` | `none` | GPT-5.6 reasoning token usage (`none`, `low`, `medium`, `high`, `xhigh`, `max`) |
 | `CHUNK_SIZE` | `1000` | Text chunk size for embeddings |
 | `CHUNK_OVERLAP` | `200` | Overlap between chunks (must be smaller than `CHUNK_SIZE`) |
 | `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
@@ -482,4 +483,4 @@ user_profile = {
 
 ---
 
-This Knowledge Agent demonstrates how to build intelligent AI agents using external model serving APIs, providing a practical example of RAG implementation and system architecture best practices. 
+This Knowledge Agent demonstrates how to build intelligent AI agents using external model serving APIs, providing a practical example of RAG implementation and system architecture best practices.

@@ -19,13 +19,14 @@ class TestDefaults:
     def test_defaults_match_documented_values(self):
         s = _settings()
 
-        assert s.llm_model == "gpt-4.1-nano"
+        assert s.llm_model == "gpt-5.6-luna"
         assert s.embedding_model == "text-embedding-3-small"
         assert s.knowledge_folder == "./knowledge_files"
         assert s.chunk_size == 1000
         assert s.chunk_overlap == 200
         assert s.max_tokens == 4096
         assert s.temperature == 0.7
+        assert s.reasoning_effort == "none"
         assert s.log_level == "INFO"
 
     def test_default_user_profile_is_copied_per_instance(self):

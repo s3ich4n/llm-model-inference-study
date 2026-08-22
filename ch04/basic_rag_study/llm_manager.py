@@ -26,16 +26,20 @@ class LLMManager:
         """Generate response using OpenAI."""
         if max_tokens is None:
             max_tokens = self.settings.max_tokens
-        if temperature is None:
-            temperature = self.settings.temperature
-            
         try:
-            response = self.client.chat.completions.create(
-                model=self.settings.llm_model,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=max_tokens,
-                temperature=temperature,
-            )
+            request = {
+                "model": self.settings.llm_model,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_completion_tokens": max_tokens,
+            }
+            # GPT-5.6 reasoning models do not need sampling temperature. Omitting
+            # it also avoids incompatibility with reasoning modes.
+            if self.settings.llm_model.startswith("gpt-5.6-"):
+                request["reasoning_effort"] = self.settings.reasoning_effort
+            elif temperature is not None:
+                request["temperature"] = temperature
+
+            response = self.client.chat.completions.create(**request)
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"Error generating OpenAI response: {e!s}")
@@ -167,4 +171,4 @@ Please provide:
 
 Analysis:
 """
-        return prompt 
+        return prompt

@@ -4,6 +4,25 @@ import pytest
 
 
 class TestGenerateResponse:
+    def test_fake_completion_requires_the_current_request_shape(
+        self,
+        fake_openai,
+    ):
+        with pytest.raises(TypeError):
+            fake_openai.chat.completions.create(
+                model="gpt-5.6-luna",
+                messages=[],
+                max_tokens=5,
+            )
+
+        with pytest.raises(TypeError):
+            fake_openai.chat.completions.create(
+                model="gpt-5.6-luna",
+                messages=[],
+                max_completion_tokens=5,
+                unsupported_option=True,
+            )
+
     def test_returns_the_message_content(
         self,
         llm_manager,
@@ -23,8 +42,9 @@ class TestGenerateResponse:
 
         call = fake_openai.completion_calls[0]
         assert call["model"] == settings.llm_model
-        assert call["max_tokens"] == settings.max_tokens
-        assert call["temperature"] == settings.temperature
+        assert call["max_completion_tokens"] == settings.max_tokens
+        assert call["reasoning_effort"] == settings.reasoning_effort
+        assert "temperature" not in call
 
     def test_arguments_override_the_defaults(
         self,
@@ -34,8 +54,8 @@ class TestGenerateResponse:
         llm_manager.generate_response("질문", max_tokens=10, temperature=0.0)
 
         call = fake_openai.completion_calls[0]
-        assert call["max_tokens"] == 10
-        assert call["temperature"] == 0.0
+        assert call["max_completion_tokens"] == 10
+        assert "temperature" not in call
 
     def test_api_failure_becomes_a_message_instead_of_an_exception(
         self,
