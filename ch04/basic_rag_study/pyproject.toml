@@ -21,6 +21,13 @@ python-preference = "system"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+# 기본 실행은 무료 테스트만 돈다. 실제 API를 쓰려면 pytest -m integration
+addopts = "-m 'not integration'"
+markers = [
+    "integration: OpenAI API를 실제로 호출한다. 키와 네트워크가 필요하고 비용이 든다",
+]
+# assert 없이 True를 반환하는 함수가 통과로 집계되던 일을 막는다
+filterwarnings = ["error::pytest.PytestReturnNotNoneWarning"]
 
 [dependency-groups]
 dev = [

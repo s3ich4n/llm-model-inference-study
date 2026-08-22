@@ -1,11 +1,11 @@
-import logging
 from typing import Any
 
 from config import Settings
 from llm_manager import LLMManager
+from logs import get_logger
 from rag_system import RAGSystem
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ActionExecutor:

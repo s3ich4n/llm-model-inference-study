@@ -18,7 +18,8 @@ def debug_agent_initialization():
     breakpoint()  # This will pause execution here
     
     try:
-        # 컨테이너가 .env를 읽고 구성 요소를 조립한다
+        # 컨테이너가 .env를 읽고 로깅을 맞춘 뒤 구성 요소를 조립한다
+        container.init_resources()
         agent = container.agent()
         print("✅ Agent initialized successfully")
         return agent

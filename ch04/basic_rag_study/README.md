@@ -80,6 +80,7 @@ KnowledgeAgent/
 ├── planner.py              # LLM-based planning system
 ├── actions.py              # Action execution logic
 ├── config.py               # Settings model (pydantic-settings)
+├── logs.py                 # Logging setup shared by all modules
 ├── pyproject.toml          # Python dependencies
 ├── .env                    # Environment variables (create from env_example.txt)
 ├── env_example.txt         # Example environment configuration
@@ -444,6 +445,7 @@ For detailed debugging instructions, see `DEBUG_GUIDE.md` in the repository.
 | `TEMPERATURE` | `0.7` | Response creativity (0.0-2.0) |
 | `CHUNK_SIZE` | `1000` | Text chunk size for embeddings |
 | `CHUNK_OVERLAP` | `200` | Overlap between chunks (must be smaller than `CHUNK_SIZE`) |
+| `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
 
 ### User Profile Configuration
 

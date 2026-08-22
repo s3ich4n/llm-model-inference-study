@@ -1,11 +1,11 @@
-import logging
 from typing import Any
 
 from openai import OpenAI
 
 from config import Settings
+from logs import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class LLMManager:
     def __init__(self, settings: Settings, client: OpenAI):

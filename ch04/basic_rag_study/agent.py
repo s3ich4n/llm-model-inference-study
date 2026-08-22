@@ -1,13 +1,13 @@
-import logging
 from typing import Any
 
 from actions import ActionExecutor
 from config import Settings
 from llm_manager import LLMManager
+from logs import get_logger
 from planner import Planner
 from rag_system import RAGSystem
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class Agent:
     """구성 요소를 직접 만들지 않고 컨테이너에서 받아 쓰는 에이전트."""

@@ -13,6 +13,9 @@ CHUNK_OVERLAP=200
 # Knowledge Base Configuration
 KNOWLEDGE_FOLDER=./knowledge_files
 
+# Logging Configuration
+LOG_LEVEL=INFO
+
 # Agent Configuration
 MAX_TOKENS=4096
 TEMPERATURE=0.7

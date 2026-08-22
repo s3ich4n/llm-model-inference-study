@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 from typing import Any
 
@@ -8,8 +7,9 @@ from openai import OpenAI
 from PyPDF2 import PdfReader
 
 from config import Settings
+from logs import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class RAGSystem:
     def __init__(self, settings: Settings, client: OpenAI):

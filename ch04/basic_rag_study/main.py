@@ -4,32 +4,32 @@
 여기서는 컨테이너에서 에이전트를 꺼내 쓰기만 한다.
 """
 
-import logging
-import sys
-
 from pydantic import ValidationError
 
 from containers import container
 
-logging.basicConfig(level=logging.INFO)
+
+def _report_settings_error(error: ValidationError) -> None:
+    """어느 설정이 왜 틀렸는지 사람이 읽을 형태로 알려준다."""
+    print("❌ 설정을 읽지 못했습니다. 아래 항목을 확인하세요.\n")
+    for err in error.errors():
+        field = ".".join(str(part) for part in err["loc"]) or "(전체)"
+        print(f"   {field.upper()}: {err['msg']}")
+    print("\n💡 env_example.txt를 .env로 복사한 뒤 값을 채우면 됩니다.")
 
 
 def main():
     # container.agent()를 부르는 순간 settings 프로바이더가 처음 평가되고,
     # 그때 .env와 환경변수를 읽는다. 값이 잘못됐으면 여기서 멈춘다.
     try:
+        container.init_resources()
         agent = container.agent()
     except ValidationError as e:
-        print("❌ 설정을 읽지 못했습니다. 아래 항목을 확인하세요.\n")
-        for err in e.errors():
-            field = ".".join(str(part) for part in err["loc"]) or "(전체)"
-            print(f"   {field.upper()}: {err['msg']}")
-        print("\n💡 env_example.txt를 .env로 복사한 뒤 값을 채우면 됩니다.")
-        sys.exit(1)
+        _report_settings_error(e)
+        raise SystemExit(1) from None
 
     print("🔨 Building knowledge base from PDF files...")
     agent.build_knowledge_base()
-
     agent.interactive_mode()
 
 

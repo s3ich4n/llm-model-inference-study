@@ -1,10 +1,10 @@
 import json
-import logging
 from typing import Any
 
 from llm_manager import LLMManager
+from logs import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class Planner:
     def __init__(self, llm_manager: LLMManager):

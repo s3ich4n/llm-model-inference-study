@@ -6,12 +6,9 @@ This script demonstrates how to use the agent for querying
 information from PDF files in the knowledge folder.
 """
 
-import logging
 
 from containers import container
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 
 def example_basic_usage():
     """Basic usage example."""
@@ -129,6 +126,8 @@ def example_different_actions():
 
 def main():
     """Run all examples."""
+    container.init_resources()
+
     print("🤖 PDF Knowledge Agent - Example Usage")
     print("=" * 60)
     

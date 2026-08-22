@@ -12,6 +12,7 @@ from actions import ActionExecutor
 from agent import Agent
 from config import load_settings
 from llm_manager import LLMManager
+from logs import configure_logging
 from planner import Planner
 from rag_system import RAGSystem
 
@@ -20,6 +21,13 @@ class Container(containers.DeclarativeContainer):
     # 환경변수는 컨테이너를 만들 때가 아니라 settings를 처음 꺼낼 때 읽힌다.
     # BaseSettings는 인자 없이 부르면 환경을 읽으므로 Singleton이 그대로 받는다.
     settings = providers.Singleton(load_settings)
+
+    # init_resources()를 부르면 settings.log_level이 로깅에 반영된다.
+    # 부르지 않으면 logs.py의 기본 레벨(INFO)로 돈다.
+    logging_setup = providers.Resource(
+        configure_logging,
+        level=settings.provided.log_level,
+    )
 
     openai_client = providers.Singleton(
         OpenAI,

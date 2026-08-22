@@ -5,7 +5,9 @@
 읽는 시점은 컨테이너가 이 클래스를 처음 부르는 구동 시점이 된다.
 """
 
-from pydantic import Field, model_validator
+from typing import Literal
+
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_USER_PROFILE = {
@@ -38,6 +40,9 @@ class Settings(BaseSettings):
     vector_db_path: str = "./vector_db"
     knowledge_folder: str = "./knowledge_files"
 
+    # 허용된 이름만 받는다. 오타는 ValidationError로 바로 드러난다.
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+
     chunk_size: int = Field(default=1000, ge=1)
     chunk_overlap: int = Field(default=200, ge=0)
     max_tokens: int = Field(default=4096, ge=1)
@@ -46,6 +51,12 @@ class Settings(BaseSettings):
     default_user_profile: dict[str, str] = Field(
         default_factory=lambda: dict(DEFAULT_USER_PROFILE)
     )
+
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def _normalize_log_level(cls, value: object) -> object:
+        # .env에 debug라고 적어도 받아준다
+        return value.upper() if isinstance(value, str) else value
 
     @model_validator(mode="after")
     def _overlap_must_be_smaller_than_chunk(self) -> "Settings":
@@ -77,6 +88,7 @@ def load_mock_settings() -> Settings:
         llm_model="gpt-4.1-nano",
         embedding_model="text-embedding-3-small",
         vector_db_path="./vector_db",
+        log_level="INFO",
         knowledge_folder="./knowledge_files",
         chunk_size=1000,
         chunk_overlap=200,
