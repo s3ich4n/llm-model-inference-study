@@ -145,7 +145,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error running examples: {e!s}")
         print("\n💡 Make sure you have:")
-        print("   1. Installed all requirements: pip install -r requirements.txt")
+        print("   1. Installed all requirements: uv sync")
         print("   2. Set up your OpenAI API key in .env file")
         print("   3. PDF files in the knowledge/ folder")
 
