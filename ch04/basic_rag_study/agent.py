@@ -30,13 +30,20 @@ class Agent:
 
         logger.info("Agent initialized successfully")
     
-    def build_knowledge_base(self, force_rebuild: bool = False):
+    def build_knowledge_base(
+        self,
+        force_rebuild: bool = False,
+    ):
         """Build the knowledge base from PDF files."""
         logger.info("Building knowledge base...")
         self.rag_system.build_vector_db(force_rebuild=force_rebuild)
         logger.info("Knowledge base built successfully")
     
-    def process_query(self, query: str, use_planning: bool = True) -> dict[str, Any]:
+    def process_query(
+        self,
+        query: str,
+        use_planning: bool = True,
+    ) -> dict[str, Any]:
         """Process a user query and return a comprehensive response."""
         logger.info(f"Processing query: {query}")
         
@@ -57,7 +64,7 @@ class Agent:
                     "plan": plan,
                     "results": results,
                     "final_response": results[-1] if results else "No response generated",
-                    "success": True
+                    "success": True,
                 }
             else:
                 # Direct execution without planning
@@ -68,7 +75,7 @@ class Agent:
                     "plan": None,
                     "results": [response],
                     "final_response": response,
-                    "success": True
+                    "success": True,
                 }
                 
         except Exception as e:
@@ -79,10 +86,14 @@ class Agent:
                 "results": [],
                 "final_response": f"Error processing query: {e!s}",
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
     
-    def _execute_action_sequence(self, query: str, action_sequence: list[str]) -> list[str]:
+    def _execute_action_sequence(
+        self,
+        query: str,
+        action_sequence: list[str],
+    ) -> list[str]:
         """Execute a sequence of actions and return results."""
         results = []
         context = ""
@@ -98,7 +109,7 @@ class Agent:
                 
                 # Execute action
                 result = self.action_executor.execute_action(
-                    action, query, context, self.user_profile
+                    action, query, context, self.user_profile,
                 )
                 
                 results.append(result)
@@ -115,7 +126,10 @@ class Agent:
         
         return results
     
-    def update_user_profile(self, new_profile: dict[str, Any]):
+    def update_user_profile(
+        self,
+        new_profile: dict[str, Any],
+    ):
         """Update the user profile."""
         self.user_profile.update(new_profile)
         logger.info(f"Updated user profile: {self.user_profile}")
@@ -124,7 +138,11 @@ class Agent:
         """Get the current user profile."""
         return self.user_profile.copy()
     
-    def search_knowledge_base(self, query: str, k: int = 5) -> list[dict[str, Any]]:
+    def search_knowledge_base(
+        self,
+        query: str,
+        k: int = 5,
+    ) -> list[dict[str, Any]]:
         """Search the knowledge base directly."""
         return self.rag_system.search(query, k)
     
@@ -134,14 +152,14 @@ class Agent:
             "rag_system": {
                 "documents_loaded": len(self.rag_system.documents),
                 "embeddings_available": len(self.rag_system.embeddings),
-                "knowledge_folder": self.settings.knowledge_folder
+                "knowledge_folder": self.settings.knowledge_folder,
             },
             "llm_manager": {
                 "model": self.settings.llm_model,
-                "embedding_model": self.settings.embedding_model
+                "embedding_model": self.settings.embedding_model,
             },
             "user_profile": self.user_profile,
-            "available_actions": self.planner.available_actions
+            "available_actions": self.planner.available_actions,
         }
     
     def interactive_mode(self):

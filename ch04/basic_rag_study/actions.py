@@ -50,7 +50,11 @@ class ActionExecutor:
         else:
             raise ValueError(f"Unknown action: {action_name}")
     
-    def query_rag_with_context(self, query: str, context: str = "") -> str:
+    def query_rag_with_context(
+        self,
+        query: str,
+        context: str = "",
+    ) -> str:
         """Query the LLM with context from RAG vector database."""
         logger.info("Executing query_rag_with_context action")
         
@@ -86,7 +90,7 @@ class ActionExecutor:
         
         # Create profile-based prompt
         profile_prompt = self.llm_manager.create_profile_based_prompt(
-            query, context, user_profile
+            query, context, user_profile,
         )
         
         # Generate response
@@ -95,7 +99,11 @@ class ActionExecutor:
         logger.info("Successfully generated profile-based response")
         return response
     
-    def generate_summary(self, query: str, context: str = "") -> str:
+    def generate_summary(
+        self,
+        query: str,
+        context: str = "",
+    ) -> str:
         """Generate a summary of the retrieved information."""
         logger.info("Executing generate_summary action")
         
@@ -112,7 +120,11 @@ class ActionExecutor:
         logger.info("Successfully generated summary")
         return response
     
-    def generate_analysis(self, query: str, context: str = "") -> str:
+    def generate_analysis(
+        self,
+        query: str,
+        context: str = "",
+    ) -> str:
         """Generate a detailed analysis of the retrieved information."""
         logger.info("Executing generate_analysis action")
         
@@ -129,11 +141,17 @@ class ActionExecutor:
         logger.info("Successfully generated analysis")
         return response
 
-    def get_action_description(self, action_name: str) -> str:
+    def get_action_description(
+        self,
+        action_name: str,
+    ) -> str:
         """Get a description of what an action does."""
         return self.descriptions.get(action_name, "Unknown action")
     
-    def validate_action_prerequisites(self, action_name: str) -> bool:
+    def validate_action_prerequisites(
+        self,
+        action_name: str,
+    ) -> bool:
         """Validate that prerequisites are met for an action."""
         if action_name in [
             "query_rag_with_context",

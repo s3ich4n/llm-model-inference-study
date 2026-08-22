@@ -12,7 +12,11 @@ from logs import get_logger
 logger = get_logger(__name__)
 
 class RAGSystem:
-    def __init__(self, settings: Settings, client: OpenAI):
+    def __init__(
+        self,
+        settings: Settings,
+        client: OpenAI,
+    ):
         self.settings = settings
         self.client = client
         self.encoding = tiktoken.encoding_for_model(self.settings.llm_model)
@@ -22,7 +26,10 @@ class RAGSystem:
         self.embeddings = []
         self.metadata = []
         
-    def load_pdfs(self, folder_path: str | None = None) -> list[dict[str, Any]]:
+    def load_pdfs(
+        self,
+        folder_path: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Load all PDF files from the knowledge folder and split into chunks."""
         if folder_path is None:
             folder_path = self.settings.knowledge_folder
@@ -51,7 +58,7 @@ class RAGSystem:
                         "content": chunk,
                         "source": pdf_file.name,
                         "file_path": str(pdf_file),
-                        "chunk_id": i
+                        "chunk_id": i,
                     })
                 
                 logger.info(f"Successfully processed {pdf_file.name} into {len(chunks)} chunks")
@@ -62,7 +69,10 @@ class RAGSystem:
         
         return documents
     
-    def _split_text(self, text: str) -> list[str]:
+    def _split_text(
+        self,
+        text: str,
+    ) -> list[str]:
         """Split text into chunks based on token count."""
         tokens = self.encoding.encode(text)
         chunks = []
@@ -75,19 +85,25 @@ class RAGSystem:
         
         return chunks
     
-    def get_embeddings(self, texts: list[str]) -> list[list[float]]:
+    def get_embeddings(
+        self,
+        texts: list[str],
+    ) -> list[list[float]]:
         """Get embeddings for a list of texts using OpenAI."""
         try:
             response = self.client.embeddings.create(
                 model=self.settings.embedding_model,
-                input=texts
+                input=texts,
             )
             return [embedding.embedding for embedding in response.data]
         except Exception as e:
             logger.error(f"Error getting embeddings: {e!s}")
             raise
     
-    def build_vector_db(self, force_rebuild: bool = False):
+    def build_vector_db(
+        self,
+        force_rebuild: bool = False,
+    ):
         """Build the vector database from PDF documents."""
         if self.documents and not force_rebuild:
             logger.info("Vector database already exists. Use force_rebuild=True to rebuild.")
@@ -112,13 +128,21 @@ class RAGSystem:
         
         logger.info(f"Vector database built with {len(documents)} documents")
     
-    def cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
+    def cosine_similarity(
+        self,
+        vec1: list[float],
+        vec2: list[float],
+    ) -> float:
         """Calculate cosine similarity between two vectors."""
         vec1 = np.array(vec1)
         vec2 = np.array(vec2)
         return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
     
-    def search(self, query: str, k: int = 5) -> list[dict[str, Any]]:
+    def search(
+        self,
+        query: str,
+        k: int = 5,
+    ) -> list[dict[str, Any]]:
         """Search the vector database for relevant documents."""
         if not self.documents:
             raise ValueError("Vector database not built. Call build_vector_db() first.")
@@ -144,13 +168,17 @@ class RAGSystem:
             results.append({
                 "content": self.documents[idx]["content"],
                 "metadata": self.metadata[idx],
-                "score": similarities[i][0]
+                "score": similarities[i][0],
             })
         
         logger.info(f"Found {len(results)} relevant documents")
         return results
     
-    def get_context_for_query(self, query: str, k: int = 5) -> str:
+    def get_context_for_query(
+        self,
+        query: str,
+        k: int = 5,
+    ) -> str:
         """Get formatted context from search results."""
         # documents가 비어 있으면 search()가 ValueError를 던진다. 비어 있지
         # 않으면 상위 k개는 반드시 나오므로 결과가 빈 경우는 없다.

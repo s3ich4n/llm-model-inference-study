@@ -30,7 +30,9 @@ _handler.setFormatter(logging.Formatter(LOG_FORMAT))
 _handler.setLevel(DEFAULT_LOG_LEVEL)
 
 
-def get_logger(name: str) -> logging.Logger:
+def get_logger(
+    name: str,
+) -> logging.Logger:
     """모듈 이름을 단 로거를 돌려준다.
 
     로거 자체는 DEBUG로 열어두고 걸러내는 일은 핸들러에 맡긴다. 그래야
@@ -44,7 +46,9 @@ def get_logger(name: str) -> logging.Logger:
     return log
 
 
-def configure_logging(level: str | int) -> None:
+def configure_logging(
+    level: str | int,
+) -> None:
     """구동 시점에 `Settings.log_level`을 반영한다.
 
     이 함수를 부르기 전에 만들어진 로거에도 그대로 적용된다. 걸러내는

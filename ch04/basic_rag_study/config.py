@@ -49,12 +49,15 @@ class Settings(BaseSettings):
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
 
     default_user_profile: dict[str, str] = Field(
-        default_factory=lambda: dict(DEFAULT_USER_PROFILE)
+        default_factory=lambda: dict(DEFAULT_USER_PROFILE),
     )
 
     @field_validator("log_level", mode="before")
     @classmethod
-    def _normalize_log_level(cls, value: object) -> object:
+    def _normalize_log_level(
+        cls,
+        value: object,
+    ) -> object:
         # .env에 debug라고 적어도 받아준다
         return value.upper() if isinstance(value, str) else value
 
@@ -65,7 +68,7 @@ class Settings(BaseSettings):
         if self.chunk_overlap >= self.chunk_size:
             raise ValueError(
                 f"chunk_overlap({self.chunk_overlap})은 "
-                f"chunk_size({self.chunk_size})보다 작아야 한다"
+                f"chunk_size({self.chunk_size})보다 작아야 한다",
             )
         return self
 

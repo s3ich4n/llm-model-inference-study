@@ -7,16 +7,22 @@ from logs import get_logger
 logger = get_logger(__name__)
 
 class Planner:
-    def __init__(self, llm_manager: LLMManager):
+    def __init__(
+        self,
+        llm_manager: LLMManager,
+    ):
         self.llm_manager = llm_manager
         self.available_actions = [
             "query_rag_with_context",
             "generate_profile_based_response",
             "generate_summary",
-            "generate_analysis"
+            "generate_analysis",
         ]
     
-    def create_plan(self, query: str) -> dict[str, Any]:
+    def create_plan(
+        self,
+        query: str,
+    ) -> dict[str, Any]:
         """Create an execution plan for the given query using OpenAI."""
         logger.info(f"Creating plan for query: {query}")
         
@@ -38,7 +44,10 @@ class Planner:
             # Fallback to default plan
             return self._create_fallback_plan(query)
     
-    def _parse_plan_response(self, response: str) -> dict[str, Any]:
+    def _parse_plan_response(
+        self,
+        response: str,
+    ) -> dict[str, Any]:
         """Parse the OpenAI response to extract the plan."""
         try:
             # Try to extract JSON from the response
@@ -66,7 +75,10 @@ class Planner:
             logger.warning(f"Raw response: {response}")
             raise
     
-    def _create_fallback_plan(self, query: str) -> dict[str, Any]:
+    def _create_fallback_plan(
+        self,
+        query: str,
+    ) -> dict[str, Any]:
         """Create a fallback plan when OpenAI planning fails."""
         logger.info("Creating fallback plan")
         
@@ -78,33 +90,36 @@ class Planner:
             plan = {
                 "plan": ["query_rag_with_context"],
                 "reasoning": "User is asking for information, so we need to query the knowledge base",
-                "estimated_steps": 1
+                "estimated_steps": 1,
             }
         elif any(word in query_lower for word in ["summarize", "summary", "brief"]):
             # Summary request
             plan = {
                 "plan": ["query_rag_with_context", "generate_summary"],
                 "reasoning": "User wants a summary, so we need to get context and then summarize",
-                "estimated_steps": 2
+                "estimated_steps": 2,
             }
         elif any(word in query_lower for word in ["analyze", "analysis", "compare", "evaluate"]):
             # Analysis request
             plan = {
                 "plan": ["query_rag_with_context", "generate_analysis"],
                 "reasoning": "User wants analysis, so we need to get context and then provide detailed analysis",
-                "estimated_steps": 2
+                "estimated_steps": 2,
             }
         else:
             # General query, use both actions
             plan = {
                 "plan": ["query_rag_with_context", "generate_profile_based_response"],
                 "reasoning": "General query requiring both knowledge retrieval and personalized response",
-                "estimated_steps": 2
+                "estimated_steps": 2,
             }
         
         return plan
     
-    def validate_plan(self, plan: dict[str, Any]) -> bool:
+    def validate_plan(
+        self,
+        plan: dict[str, Any],
+    ) -> bool:
         """Validate that the plan contains valid actions."""
         if not isinstance(plan, dict):
             return False
@@ -120,7 +135,10 @@ class Planner:
         
         return True
     
-    def get_action_sequence(self, plan: dict[str, Any]) -> list[str]:
+    def get_action_sequence(
+        self,
+        plan: dict[str, Any],
+    ) -> list[str]:
         """Extract the action sequence from a plan."""
         if self.validate_plan(plan):
             return plan["plan"]

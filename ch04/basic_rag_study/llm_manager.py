@@ -8,7 +8,11 @@ from logs import get_logger
 logger = get_logger(__name__)
 
 class LLMManager:
-    def __init__(self, settings: Settings, client: OpenAI):
+    def __init__(
+        self,
+        settings: Settings,
+        client: OpenAI,
+    ):
         self.settings = settings
         self.client = client
         logger.info("LLM Manager initialized")
@@ -30,14 +34,18 @@ class LLMManager:
                 model=self.settings.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
-                temperature=temperature
+                temperature=temperature,
             )
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"Error generating OpenAI response: {e!s}")
             return f"Error generating response: {e!s}"
     
-    def create_planning_prompt(self, query: str, available_actions: list) -> str:
+    def create_planning_prompt(
+        self,
+        query: str,
+        available_actions: list,
+    ) -> str:
         """Create a prompt for the planner to determine the best action sequence."""
         prompt = f"""
 You are an intelligent planning agent. Given a user query and available actions, determine the best sequence of actions to fulfill the user's request.
@@ -63,7 +71,11 @@ Respond only with the JSON object:
 """
         return prompt
     
-    def create_rag_prompt(self, query: str, context: str) -> str:
+    def create_rag_prompt(
+        self,
+        query: str,
+        context: str,
+    ) -> str:
         """Create a prompt for RAG-based question answering."""
         prompt = f"""
 You are a helpful assistant with access to a knowledge base. Use the provided context to answer the user's question accurately and comprehensively.
@@ -84,7 +96,12 @@ Answer:
 """
         return prompt
     
-    def create_profile_based_prompt(self, query: str, context: str, user_profile: dict[str, Any]) -> str:
+    def create_profile_based_prompt(
+        self,
+        query: str,
+        context: str,
+        user_profile: dict[str, Any],
+    ) -> str:
         """Create a prompt that considers the user's profile for personalized responses."""
         expertise_level = user_profile.get("expertise_level", "intermediate")
         background = user_profile.get("background", "technical")
@@ -113,7 +130,11 @@ Personalized Answer:
 """
         return prompt
     
-    def create_summary_prompt(self, text: str, max_length: int = 200) -> str:
+    def create_summary_prompt(
+        self,
+        text: str,
+        max_length: int = 200,
+    ) -> str:
         """Create a prompt for summarizing text."""
         prompt = f"""
 Please summarize the following text in {max_length} words or less, maintaining the key points and technical accuracy:
@@ -124,7 +145,11 @@ Summary:
 """
         return prompt
     
-    def create_analysis_prompt(self, query: str, context: str) -> str:
+    def create_analysis_prompt(
+        self,
+        query: str,
+        context: str,
+    ) -> str:
         """Create a prompt for detailed analysis."""
         prompt = f"""
 You are an expert analyst. Please provide a detailed analysis of the following question based on the provided context.

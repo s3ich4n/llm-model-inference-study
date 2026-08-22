@@ -27,7 +27,9 @@ def debug_agent_initialization():
         print(f"❌ Error initializing agent: {e}")
         return None
 
-def debug_knowledge_base_building(agent):
+def debug_knowledge_base_building(
+    agent,
+):
     """Debug knowledge base building."""
     print("\n🔍 Debugging Knowledge Base Building")
     print("=" * 50)
@@ -46,7 +48,10 @@ def debug_knowledge_base_building(agent):
     except Exception as e:
         print(f"❌ Error building knowledge base: {e}")
 
-def debug_query_processing(agent, query: str = "What is artificial intelligence?"):
+def debug_query_processing(
+    agent,
+    query: str = "What is artificial intelligence?",
+):
     """Debug query processing."""
     print(f"\n🔍 Debugging Query Processing: '{query}'")
     print("=" * 50)
@@ -67,7 +72,9 @@ def debug_query_processing(agent, query: str = "What is artificial intelligence?
     except Exception as e:
         print(f"❌ Error processing query: {e}")
 
-def debug_rag_system(agent):
+def debug_rag_system(
+    agent,
+):
     """Debug RAG system directly."""
     print("\n🔍 Debugging RAG System")
     print("=" * 50)
@@ -87,7 +94,9 @@ def debug_rag_system(agent):
     except Exception as e:
         print(f"❌ Error in RAG system: {e}")
 
-def debug_planner(agent):
+def debug_planner(
+    agent,
+):
     """Debug planner functionality."""
     print("\n🔍 Debugging Planner")
     print("=" * 50)
@@ -106,7 +115,9 @@ def debug_planner(agent):
     except Exception as e:
         print(f"❌ Error in planner: {e}")
 
-def debug_actions(agent):
+def debug_actions(
+    agent,
+):
     """Debug action executor."""
     print("\n🔍 Debugging Action Executor")
     print("=" * 50)

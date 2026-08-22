@@ -86,7 +86,6 @@ KnowledgeAgent/
 ├── env_example.txt         # Example environment configuration
 ├── README.md               # This file
 ├── example_usage.py        # Example usage script
-├── check_api_key.py        # Diagnose API key and model access
 ├── tests/
 │   ├── conftest.py         # Shared fixtures (mock settings, fake OpenAI client)
 │   ├── test_config.py      # Settings loading and validation
@@ -247,8 +246,8 @@ client, so the same objects work without a key. See `tests/conftest.py`.
 ### Test Configuration
 
 ```bash
-# Validate API key and model access
-python check_api_key.py
+# Validate API key and model access (calls the real API)
+pytest -m integration
 
 # Check environment setup
 python -c "from config import load_settings; print(load_settings().openai_api_key[:10] + '...')"

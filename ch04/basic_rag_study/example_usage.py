@@ -26,7 +26,7 @@ def example_basic_usage():
         "What is 5-level paging?",
         "Explain database queries and data mining",
         "What are Patricia tries?",
-        "Tell me about Standard Annotation Language (SAL)"
+        "Tell me about Standard Annotation Language (SAL)",
     ]
     
     for query in queries:
@@ -48,7 +48,7 @@ def example_custom_user_profile():
     custom_profile = {
         "expertise_level": "beginner",
         "background": "business",
-        "preferred_detail_level": "high"
+        "preferred_detail_level": "high",
     }
     
     agent = container.agent(user_profile=custom_profile)
@@ -110,7 +110,7 @@ def example_different_actions():
     queries = [
         ("What is 5-level paging?", "Information query"),
         ("Summarize the key points about database queries", "Summary query"),
-        ("Analyze the benefits and drawbacks of Patricia tries", "Analysis query")
+        ("Analyze the benefits and drawbacks of Patricia tries", "Analysis query"),
     ]
     
     for query, query_type in queries:

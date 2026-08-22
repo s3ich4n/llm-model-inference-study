@@ -9,7 +9,9 @@ from pydantic import ValidationError
 from containers import container
 
 
-def _report_settings_error(error: ValidationError) -> None:
+def _report_settings_error(
+    error: ValidationError,
+) -> None:
     """어느 설정이 왜 틀렸는지 사람이 읽을 형태로 알려준다."""
     print("❌ 설정을 읽지 못했습니다. 아래 항목을 확인하세요.\n")
     for err in error.errors():
