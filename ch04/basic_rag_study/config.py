@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     """에이전트 구성 요소들이 공유하는 설정.
 
     필드 이름이 그대로 환경변수 이름이 된다(대소문자 구분 없음). 즉
-    `chunk_size`는 `CHUNK_SIZE`를 읽고, 문자열을 int로 바꾸는 것도
+    `chunk_size` 는 `CHUNK_SIZE`를 읽고, 문자열을 int로 바꾸는 것도
     pydantic이 한다.
     """
 
@@ -79,26 +79,3 @@ class Settings(BaseSettings):
 def load_settings() -> Settings:
     """`.env`와 OS 환경변수를 읽어 실제 설정을 만든다."""
     return Settings()
-
-
-def load_mock_settings() -> Settings:
-    """환경을 전혀 타지 않는 고정 설정.
-
-    pydantic-settings는 생성자 인자를 환경변수보다 우선하므로, 모든 필드를
-    직접 넘기면 `.env`가 있든 없든 항상 같은 값이 나온다. `_env_file=None`은
-    `.env` 파일 자체를 읽지 않겠다는 뜻이다.
-    """
-    return Settings(
-        _env_file=None,
-        openai_api_key="sk-test-mock-key",
-        llm_model="gpt-5.6-luna",
-        embedding_model="text-embedding-3-small",
-        vector_db_path="./vector_db",
-        log_level="INFO",
-        knowledge_folder="./knowledge_files",
-        chunk_size=1000,
-        chunk_overlap=200,
-        max_tokens=4096,
-        temperature=0.7,
-        reasoning_effort="none",
-    )

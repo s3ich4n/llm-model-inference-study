@@ -10,11 +10,55 @@ from types import SimpleNamespace
 
 import pytest
 from dependency_injector import providers
+from pydantic_settings import SettingsConfigDict
 
-from config import load_mock_settings
+from config import Settings
 from containers import Container
 
 EMBEDDING_DIM = 16
+
+
+class MockSettings(Settings):
+    """환경을 아예 보지 않는 Settings.
+
+    `_env_file=None`만으로는 부족하다. `.env` 읽기는 막아도 OS 환경변수는
+    그대로 들어오기 때문이다. 그래서 설정 출처를 생성자 인자 하나로 줄인다.
+    넘기지 않은 필드는 `Settings`에 선언된 기본값을 그대로 쓰므로, 필드가
+    늘어나도 여기를 따라 고칠 필요가 없다.
+
+    검사 규칙은 그대로 살아 있다. 테스트가 통과시키는 설정은 실제로도
+    통과할 수 있는 설정이어야 한다.
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=None,
+        extra="ignore",
+        frozen=True,
+    )
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ):
+        """TC 구동 시 별도 값이 들어오지 않도록 방어하기 위해 오버라이드
+
+        - mise 를 쓰는 환경
+        - CI환경 등
+        """
+        return (init_settings,)
+
+
+def load_mock_settings(**overrides) -> Settings:
+    """가짜 설정을 만든다. 바꾸고 싶은 필드만 키워드로 넘기면 된다."""
+    return MockSettings(
+        openai_api_key="sk-test-mock-key",
+        **overrides,
+    )
 
 
 def _deterministic_embedding(
@@ -117,6 +161,21 @@ class FakeOpenAI:
                 total_tokens=0,
             ),
         )
+
+
+@pytest.fixture(autouse=True)
+def _isolate_settings_environment(monkeypatch, request):
+    """셸에 export된 설정 값이 테스트에 새어들지 않게 막는다.
+
+    개발자 환경에 `CHUNK_SIZE=7` 같은 게 남아 있으면 기본값을 확인하는
+    테스트가 엉뚱하게 깨진다. 다만 integration 테스트는 실제 mise/.env
+    설정과 API 키를 사용해야 하므로 환경을 그대로 둔다.
+    """
+    if request.node.get_closest_marker("integration") is not None:
+        return
+
+    for name in Settings.model_fields:
+        monkeypatch.delenv(name.upper(), raising=False)
 
 
 @pytest.fixture

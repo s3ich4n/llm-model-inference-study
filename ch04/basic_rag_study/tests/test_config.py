@@ -5,7 +5,8 @@ import logging
 import pytest
 from pydantic import ValidationError
 
-from config import DEFAULT_USER_PROFILE, Settings, load_mock_settings, load_settings
+from config import DEFAULT_USER_PROFILE, Settings, load_settings
+from tests.conftest import load_mock_settings
 
 
 def _settings(
@@ -190,8 +191,31 @@ class TestMockSettings:
 
         assert load_settings().chunk_size == 512
 
-    def test_mock_settings_cover_every_field(self):
-        """필드를 추가하고 mock을 안 고치면 환경을 타게 되므로 여기서 잡는다."""
-        explicit = load_mock_settings().model_fields_set
+    def test_mock_settings_match_the_declared_defaults(self):
+        """넘기지 않은 필드는 Settings의 기본값을 그대로 따라간다.
 
-        assert set(Settings.model_fields) - explicit == {"default_user_profile"}
+        손으로 값을 다시 적어두면 필드가 늘 때마다 어긋난다. 출처를 생성자
+        인자로 좁혀놨으므로 목록을 따로 관리할 필요가 없다.
+        """
+        mock = load_mock_settings()
+
+        for name, field in Settings.model_fields.items():
+            if field.is_required():
+                continue
+            expected = field.get_default(call_default_factory=True)
+            assert getattr(mock, name) == expected
+
+    def test_overrides_are_accepted(self):
+        assert load_mock_settings(log_level="DEBUG").log_level == "DEBUG"
+
+    def test_an_override_still_has_to_satisfy_the_whole_model(self):
+        """chunk_size만 줄이면 기본 chunk_overlap(200)이 그보다 커진다."""
+        with pytest.raises(ValidationError, match="chunk_size"):
+            load_mock_settings(chunk_size=42)
+
+        assert load_mock_settings(chunk_size=42, chunk_overlap=8).chunk_size == 42
+
+    def test_validation_still_applies_to_mock_settings(self):
+        """테스트가 통과시키는 설정은 실제로도 통과할 수 있어야 한다."""
+        with pytest.raises(ValidationError):
+            load_mock_settings(chunk_size=10, chunk_overlap=10)
