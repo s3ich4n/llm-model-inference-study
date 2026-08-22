@@ -62,7 +62,7 @@ The Knowledge Agent is built with a modular architecture consisting of several k
 - **No Local Models**: All AI capabilities are served via API
 
 **Other Dependencies**:
-- `PyPDF2`: PDF text extraction
+- `pypdf`: PDF text extraction
 - `tiktoken`: Token counting and management
 - `numpy`: Vector similarity calculations
 - `pydantic-settings`: Typed settings loaded from `.env` and environment variables
@@ -86,11 +86,17 @@ KnowledgeAgent/
 ├── env_example.txt         # Example environment configuration
 ├── README.md               # This file
 ├── example_usage.py        # Example usage script
+├── check_api_key.py        # Diagnose API key and model access
 ├── tests/
-│   ├── conftest.py         # Shared fixtures (mock settings container)
-│   ├── test_agent.py       # Test suite
-│   ├── test_rag_system.py  # RAG system tests
-│   └── test_api_key.py     # API key validation test
+│   ├── conftest.py         # Shared fixtures (mock settings, fake OpenAI client)
+│   ├── test_config.py      # Settings loading and validation
+│   ├── test_containers.py  # Dependency wiring
+│   ├── test_logs.py        # Logging setup
+│   ├── test_rag_system.py  # Chunking, search, and the real-API cases
+│   ├── test_planner.py     # Planning and fallback rules
+│   ├── test_actions.py     # Action dispatch
+│   ├── test_llm_manager.py # Prompt building
+│   └── test_agent.py       # Orchestration
 ├── debug_agent.py          # Debugging utilities
 ├── debug_simple.py         # Simple debugging script
 ├── DEBUG_GUIDE.md          # Debugging guide
@@ -207,38 +213,42 @@ print(result["final_response"])
 ### Run All Tests
 
 ```bash
-# Run the whole suite
+# Run the whole suite. No API key needed, no network calls, no cost.
 pytest
 
-# Run specific test files
+# Run one file
 pytest tests/test_rag_system.py
-python tests/test_api_key.py
+
+# Run the tests that call the real OpenAI API (needs a key, costs money)
+pytest -m integration
 ```
 
 ### Test Individual Components
 
+Components take their dependencies through the constructor, so pull them
+from the container instead of building them by hand.
+
 ```python
-# Test RAG system
-from rag_system import RAGSystem
-rag = RAGSystem()
+from containers import container
+
+rag = container.rag_system()
 rag.build_vector_db()
 
-# Test LLM manager
-from llm_manager import LLMManager
-llm = LLMManager()
+llm = container.llm_manager()
 response = llm.generate_response("Hello, world!")
 
-# Test agent
-from agent import Agent
-agent = Agent()
+agent = container.agent()
 status = agent.get_system_status()
 ```
+
+In tests, the `container` fixture swaps in mock settings and a fake OpenAI
+client, so the same objects work without a key. See `tests/conftest.py`.
 
 ### Test Configuration
 
 ```bash
-# Validate API key
-python tests/test_api_key.py
+# Validate API key and model access
+python check_api_key.py
 
 # Check environment setup
 python -c "from config import load_settings; print(load_settings().openai_api_key[:10] + '...')"

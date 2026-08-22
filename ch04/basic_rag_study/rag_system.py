@@ -4,7 +4,7 @@ from typing import Any
 import numpy as np
 import tiktoken
 from openai import OpenAI
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 from config import Settings
 from logs import get_logger
@@ -152,11 +152,10 @@ class RAGSystem:
     
     def get_context_for_query(self, query: str, k: int = 5) -> str:
         """Get formatted context from search results."""
+        # documents가 비어 있으면 search()가 ValueError를 던진다. 비어 있지
+        # 않으면 상위 k개는 반드시 나오므로 결과가 빈 경우는 없다.
         results = self.search(query, k)
-        
-        if not results:
-            return "No relevant information found."
-        
+
         context_parts = []
         for i, result in enumerate(results, 1):
             content = result["content"]
