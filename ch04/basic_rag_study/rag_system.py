@@ -7,15 +7,15 @@ import tiktoken
 from openai import OpenAI
 from PyPDF2 import PdfReader
 
-from config import Config
+from config import Settings
 
 logger = logging.getLogger(__name__)
 
 class RAGSystem:
-    def __init__(self, config: Config, client: OpenAI):
-        self.config = config
+    def __init__(self, settings: Settings, client: OpenAI):
+        self.settings = settings
         self.client = client
-        self.encoding = tiktoken.encoding_for_model(self.config.llm_model)
+        self.encoding = tiktoken.encoding_for_model(self.settings.llm_model)
         
         # In-memory storage for embeddings and documents
         self.documents = []
@@ -25,7 +25,7 @@ class RAGSystem:
     def load_pdfs(self, folder_path: str | None = None) -> list[dict[str, Any]]:
         """Load all PDF files from the knowledge folder and split into chunks."""
         if folder_path is None:
-            folder_path = self.config.knowledge_folder
+            folder_path = self.settings.knowledge_folder
             
         documents = []
         pdf_files = list(Path(folder_path).glob("*.pdf"))
@@ -67,8 +67,8 @@ class RAGSystem:
         tokens = self.encoding.encode(text)
         chunks = []
         
-        for i in range(0, len(tokens), self.config.chunk_size - self.config.chunk_overlap):
-            chunk_tokens = tokens[i:i + self.config.chunk_size]
+        for i in range(0, len(tokens), self.settings.chunk_size - self.settings.chunk_overlap):
+            chunk_tokens = tokens[i:i + self.settings.chunk_size]
             chunk_text = self.encoding.decode(chunk_tokens)
             if chunk_text.strip():
                 chunks.append(chunk_text.strip())
@@ -79,7 +79,7 @@ class RAGSystem:
         """Get embeddings for a list of texts using OpenAI."""
         try:
             response = self.client.embeddings.create(
-                model=self.config.embedding_model,
+                model=self.settings.embedding_model,
                 input=texts
             )
             return [embedding.embedding for embedding in response.data]

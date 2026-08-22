@@ -18,15 +18,15 @@ class TestRAGSystemReal(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        # 컨테이너가 .env를 읽는다. 키가 없으면 load_config()가 ValueError를 던진다.
+        # 컨테이너가 .env를 읽는다. 키가 없으면 Settings()가 ValidationError를 던진다.
         self.container = Container()
         try:
-            self.config = self.container.config()
+            self.settings = self.container.settings()
         except ValueError as e:
             self.skipTest(str(e))
         
         # Check if knowledge_files folder exists
-        self.knowledge_folder = Path(self.config.knowledge_folder)
+        self.knowledge_folder = Path(self.settings.knowledge_folder)
         if not self.knowledge_folder.exists():
             self.skipTest("knowledge_files folder not found. Please ensure PDF files are in the knowledge_files folder.")
         
@@ -39,7 +39,7 @@ class TestRAGSystemReal(unittest.TestCase):
     
     def test_config_loading(self):
         """Test that configuration loads correctly."""
-        config = self.config
+        config = self.settings
         
         # Test that required config values exist
         self.assertIsNotNone(config.llm_model)

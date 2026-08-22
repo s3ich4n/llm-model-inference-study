@@ -3,27 +3,31 @@ from typing import Any
 
 from openai import OpenAI
 
-from config import Config
+from config import Settings
 
 logger = logging.getLogger(__name__)
 
 class LLMManager:
-    def __init__(self, config: Config, client: OpenAI):
-        self.config = config
+    def __init__(self, settings: Settings, client: OpenAI):
+        self.settings = settings
         self.client = client
         logger.info("LLM Manager initialized")
     
-    def generate_response(self, prompt: str, max_tokens: int | None = None, 
-                         temperature: float | None = None) -> str:
+    def generate_response(
+        self,
+        prompt: str,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str:
         """Generate response using OpenAI."""
         if max_tokens is None:
-            max_tokens = self.config.max_tokens
+            max_tokens = self.settings.max_tokens
         if temperature is None:
-            temperature = self.config.temperature
+            temperature = self.settings.temperature
             
         try:
             response = self.client.chat.completions.create(
-                model=self.config.llm_model,
+                model=self.settings.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
                 temperature=temperature

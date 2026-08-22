@@ -65,26 +65,31 @@ The Knowledge Agent is built with a modular architecture consisting of several k
 - `PyPDF2`: PDF text extraction
 - `tiktoken`: Token counting and management
 - `numpy`: Vector similarity calculations
-- `python-dotenv`: Environment variable management
+- `pydantic-settings`: Typed settings loaded from `.env` and environment variables
+- `dependency-injector`: Wiring of the agent's components
 
 ## Repository Structure
 
 ```
 KnowledgeAgent/
+├── main.py                 # Entry point
+├── containers.py           # Dependency injection container
 ├── agent.py                 # Main agent orchestrator
 ├── rag_system.py           # RAG system for document processing
 ├── llm_manager.py          # OpenAI API management
 ├── planner.py              # LLM-based planning system
 ├── actions.py              # Action execution logic
-├── config.py               # Configuration management
-├── requirements.txt        # Python dependencies
+├── config.py               # Settings model (pydantic-settings)
+├── pyproject.toml          # Python dependencies
 ├── .env                    # Environment variables (create from env_example.txt)
 ├── env_example.txt         # Example environment configuration
 ├── README.md               # This file
 ├── example_usage.py        # Example usage script
-├── test_agent.py           # Test suite
-├── test_rag_system.py      # RAG system tests
-├── test_api_key.py         # API key validation test
+├── tests/
+│   ├── conftest.py         # Shared fixtures (mock settings container)
+│   ├── test_agent.py       # Test suite
+│   ├── test_rag_system.py  # RAG system tests
+│   └── test_api_key.py     # API key validation test
 ├── debug_agent.py          # Debugging utilities
 ├── debug_simple.py         # Simple debugging script
 ├── DEBUG_GUIDE.md          # Debugging guide
@@ -110,17 +115,8 @@ KnowledgeAgent/
 git clone <repository-url>
 cd KnowledgeAgent
 
-# Create and activate virtual environment
-python -m venv venv
-
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-# venv\Scripts\activate
-
-# Install dependencies in virtual environment
-pip install -r requirements.txt
+# Create the virtual environment and install everything from uv.lock
+uv sync
 
 # Create environment file
 cp env_example.txt .env
@@ -244,7 +240,7 @@ status = agent.get_system_status()
 python tests/test_api_key.py
 
 # Check environment setup
-python -c "from config import load_config; print(load_config().openai_api_key[:10] + '...')"
+python -c "from config import load_settings; print(load_settings().openai_api_key[:10] + '...')"
 ```
 
 ## How to Debug the Agent
@@ -442,12 +438,12 @@ For detailed debugging instructions, see `DEBUG_GUIDE.md` in the repository.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OPENAI_API_KEY` | Required | Your OpenAI API key |
-| `LLM_MODEL` | `gpt-4` | LLM model for planning and responses |
+| `LLM_MODEL` | `gpt-4.1-nano` | LLM model for planning and responses |
 | `EMBEDDING_MODEL` | `text-embedding-3-small` | Model for document embeddings |
-| `MAX_TOKENS` | `2048` | Maximum tokens for responses |
-| `TEMPERATURE` | `0.7` | Response creativity (0.0-1.0) |
+| `MAX_TOKENS` | `4096` | Maximum tokens for responses |
+| `TEMPERATURE` | `0.7` | Response creativity (0.0-2.0) |
 | `CHUNK_SIZE` | `1000` | Text chunk size for embeddings |
-| `CHUNK_OVERLAP` | `200` | Overlap between chunks |
+| `CHUNK_OVERLAP` | `200` | Overlap between chunks (must be smaller than `CHUNK_SIZE`) |
 
 ### User Profile Configuration
 

@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from actions import ActionExecutor
-from config import Config
+from config import Settings
 from llm_manager import LLMManager
 from planner import Planner
 from rag_system import RAGSystem
@@ -14,19 +14,19 @@ class Agent:
 
     def __init__(
         self,
-        config: Config,
+        settings: Settings,
         rag_system: RAGSystem,
         llm_manager: LLMManager,
         planner: Planner,
         action_executor: ActionExecutor,
         user_profile: dict[str, Any] | None = None,
     ):
-        self.config = config
+        self.settings = settings
         self.rag_system = rag_system
         self.llm_manager = llm_manager
         self.planner = planner
         self.action_executor = action_executor
-        self.user_profile = user_profile or dict(self.config.default_user_profile)
+        self.user_profile = user_profile or dict(self.settings.default_user_profile)
 
         logger.info("Agent initialized successfully")
     
@@ -134,11 +134,11 @@ class Agent:
             "rag_system": {
                 "documents_loaded": len(self.rag_system.documents),
                 "embeddings_available": len(self.rag_system.embeddings),
-                "knowledge_folder": self.config.knowledge_folder
+                "knowledge_folder": self.settings.knowledge_folder
             },
             "llm_manager": {
-                "model": self.config.llm_model,
-                "embedding_model": self.config.embedding_model
+                "model": self.settings.llm_model,
+                "embedding_model": self.settings.embedding_model
             },
             "user_profile": self.user_profile,
             "available_actions": self.planner.available_actions

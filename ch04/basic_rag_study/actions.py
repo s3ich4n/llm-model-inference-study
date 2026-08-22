@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from config import Config
+from config import Settings
 from llm_manager import LLMManager
 from rag_system import RAGSystem
 
@@ -13,11 +13,11 @@ class ActionExecutor:
         self,
         rag_system: RAGSystem,
         llm_manager: LLMManager,
-        config: Config,
+        settings: Settings,
     ):
         self.rag_system = rag_system
         self.llm_manager = llm_manager
-        self.config = config
+        self.settings = settings
         self.descriptions = {
             "query_rag_with_context":
                 "Query the knowledge base and generate a response based on retrieved context",
@@ -78,7 +78,7 @@ class ActionExecutor:
         
         # Use default profile if none provided
         if user_profile is None:
-            user_profile = self.config.default_user_profile
+            user_profile = self.settings.default_user_profile
         
         # If no context provided, get it from RAG system
         if not context:

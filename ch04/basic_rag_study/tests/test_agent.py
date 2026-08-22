@@ -18,7 +18,7 @@ def test_imports():
     print("🔍 Testing imports...")
     
     try:
-        from config import load_config  # noqa: F401
+        from config import load_settings  # noqa: F401
         print("✅ Config imported successfully")
         
         from rag_system import RAGSystem  # noqa: F401
@@ -47,8 +47,8 @@ def test_config():
     print("\n🔍 Testing configuration...")
     
     try:
-        from config import load_mock_config
-        config = load_mock_config()
+        from config import load_mock_settings
+        config = load_mock_settings()
         
         print(f"✅ LLM Model: {config.llm_model}")
         print(f"✅ Embedding Model: {config.embedding_model}")
@@ -148,7 +148,7 @@ def test_requirements():
     
     if missing_packages:
         print(f"\n⚠️  Missing packages: {', '.join(missing_packages)}")
-        print("   Run: pip install -r requirements.txt")
+        print("   Run: uv sync")
         return False
     
     return True
@@ -189,7 +189,7 @@ def main():
     else:
         print("❌ Some tests failed. Please check the errors above.")
         print("\n💡 Common solutions:")
-        print("   1. Install dependencies: pip install -r requirements.txt")
+        print("   1. Install dependencies: uv sync")
         print("   2. Ensure PDF files are in the knowledge/ folder")
         print("   3. Set up your OpenAI API key in .env file")
     
